@@ -13,7 +13,8 @@ const io = require('socket.io')(server, {
     }
 });
 
-// Enkel route så Render kan verifiera att tjänsten svararapp.get('/', (req, res) => {
+// Servera Chicago-spelet
+app.get('/', (req, res) => {
     res.sendFile(__dirname + '/index.html');
 });
 
@@ -54,6 +55,7 @@ io.on('connection', (socket) => {
 
     socket.on('update_state', (data) => {
         if (!data || !roomCode) return;
+
         players = data.players || [];
         scores = data.scores || {};
         currentRound = data.currentRound || 0;
@@ -80,6 +82,7 @@ io.on('connection', (socket) => {
             socket.emit('no_room');
             return;
         }
+
         socket.emit('game_state', {
             players,
             scores,
@@ -95,6 +98,7 @@ io.on('connection', (socket) => {
 
     socket.on('disconnect', () => {
         console.log('🔴 Spelare kopplade från');
+
         if (socket.id === hostId) {
             console.log('👑 Host disconnectade');
             io.to(roomCode).emit('host_disconnected');
@@ -108,9 +112,11 @@ io.on('connection', (socket) => {
 function generateRoomCode() {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     let code = '';
+
     for (let i = 0; i < 6; i++) {
         code += chars.charAt(Math.floor(Math.random() * chars.length));
     }
+
     return code;
 }
 
@@ -118,6 +124,7 @@ function generateRoomCode() {
 // START SERVER
 // ============================================================
 const PORT = process.env.PORT || 3001;
+
 server.listen(PORT, () => {
     console.log(`🎲 Chicago-server körs på port ${PORT}`);
     console.log(`📡 Väntar på anslutningar...`);
