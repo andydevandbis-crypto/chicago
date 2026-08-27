@@ -1,305 +1,125 @@
-﻿const express = require("express");
-const http = require("http");
-const { Server } = require("socket.io");
-const path = require("path");
-
+const express = require('express');
 const app = express();
-const server = http.createServer(app);
+const server = require('http').createServer(app);
 
-const io = new Server(server, {
+// Sätt FRONTEND_URL som env-variabel i Render när du vet er live-frontend-URL,
+// t.ex. https://mitt-spel.vercel.app. Tills dess tillåts alla origins ("*").
+const allowedOrigin = process.env.FRONTEND_URL || "*";
+
+const io = require('socket.io')(server, {
     cors: {
-        origin: "*"
+        origin: allowedOrigin,
+        methods: ["GET", "POST"]
     }
 });
 
-const PORT = process.env.PORT || 3001;
-
-app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, "index.html"));
+// Enkel route så Render kan verifiera att tjänsten svarar
+app.get('/', (req, res) => {
+    res.send('Chicago socket-server är igång 🎲');
 });
 
-app.use(express.static(__dirname));
+// ============================================================
+// SPELSTATE
+// ============================================================
+let players = [];
+let scores = {};
+let currentRound = 0;
+let activePlayerIndex = 0;
+let gameStarted = false;
+let statistics = {};
+let previousWinner = null;
+let hostId = null;
+let roomCode = null;
 
 // ============================================================
-// RUM
+// SOCKET.IO EVENTS
 // ============================================================
+io.on('connection', (socket) => {
+    console.log('🔵 Ny spelare ansluten!');
 
-const rooms = new Map();
+    socket.on('create_room', () => {
+        roomCode = generateRoomCode();
+        hostId = socket.id;
+        socket.join(roomCode);
+        socket.emit('room_created', { roomCode, hostId });
+        console.log(`🏠 Rum skapat: ${roomCode} av ${socket.id}`);
+    });
 
-function createRoomCode() {
-    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    socket.on('join_room', (code) => {
+        if (!code) return;
+        socket.join(code);
+        roomCode = code;
+        socket.emit('room_joined', { roomCode, hostId });
+        console.log(`🏠 Spelare gick med i rum: ${code}`);
+    });
 
-    let code;
+    socket.on('update_state', (data) => {
+        if (!data || !roomCode) return;
+        players = data.players || [];
+        scores = data.scores || {};
+        currentRound = data.currentRound || 0;
+        activePlayerIndex = data.activePlayerIndex || 0;
+        gameStarted = data.started || false;
+        statistics = data.statistics || {};
+        previousWinner = data.previousWinner || null;
 
-    do {
-        code = "";
+        io.to(roomCode).emit('game_state', {
+            players,
+            scores,
+            currentRound,
+            activePlayerIndex,
+            started: gameStarted,
+            hostId,
+            statistics,
+            previousWinner,
+            roomCode
+        });
+    });
 
-        for (let i = 0; i < 6; i++) {
-            code += chars[Math.floor(Math.random() * chars.length)];
+    socket.on('get_state', () => {
+        if (!roomCode) {
+            socket.emit('no_room');
+            return;
         }
+        socket.emit('game_state', {
+            players,
+            scores,
+            currentRound,
+            activePlayerIndex,
+            started: gameStarted,
+            hostId,
+            statistics,
+            previousWinner,
+            roomCode
+        });
+    });
 
-    } while (rooms.has(code));
+    socket.on('disconnect', () => {
+        console.log('🔴 Spelare kopplade från');
+        if (socket.id === hostId) {
+            console.log('👑 Host disconnectade');
+            io.to(roomCode).emit('host_disconnected');
+        }
+    });
+});
 
+// ============================================================
+// HJÄLPFUNKTIONER
+// ============================================================
+function generateRoomCode() {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let code = '';
+    for (let i = 0; i < 6; i++) {
+        code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
     return code;
 }
 
-function createGameState() {
-    return {
-        players: [],
-        scores: {},
-        currentRound: 0,
-        activePlayerIndex: 0,
-        started: false,
-        hostId: null,
-        statistics: {},
-        previousWinner: null
-    };
-}
-
-function emitRoomState(roomCode) {
-    const room = rooms.get(roomCode);
-
-    if (!room) return;
-
-    io.to(roomCode).emit("game_state", room.state);
-}
-
 // ============================================================
-// ANSLUTNING
+// START SERVER
 // ============================================================
-
-io.on("connection", (socket) => {
-
-    console.log("Ny enhet ansluten:", socket.id);
-
-    // --------------------------------------------------------
-    // SKAPA RUM
-    // --------------------------------------------------------
-
-    socket.on("create_room", () => {
-
-        const roomCode = createRoomCode();
-
-        const state = createGameState();
-
-        state.hostId = socket.id;
-
-        rooms.set(roomCode, {
-            state,
-            sockets: new Set([socket.id])
-        });
-
-        socket.join(roomCode);
-
-        socket.data.roomCode = roomCode;
-
-        console.log("Nytt rum:", roomCode);
-        console.log("Protokollförare:", socket.id);
-
-        socket.emit("room_created", {
-            roomCode,
-            state
-        });
-    });
-
-    // --------------------------------------------------------
-    // GÅ MED I RUM
-    // --------------------------------------------------------
-
-    socket.on("join_room", (rawCode) => {
-
-        const roomCode = String(rawCode || "")
-            .trim()
-            .toUpperCase();
-
-        const room = rooms.get(roomCode);
-
-        if (!room) {
-            socket.emit("room_error", "Rummet finns inte.");
-            return;
-        }
-
-        // Lämna eventuellt tidigare rum
-        if (socket.data.roomCode) {
-            socket.leave(socket.data.roomCode);
-        }
-
-        room.sockets.add(socket.id);
-
-        socket.join(roomCode);
-
-        socket.data.roomCode = roomCode;
-
-        console.log(
-            "Enhet gick med i rum:",
-            roomCode,
-            socket.id
-        );
-
-        socket.emit("room_joined", {
-            roomCode,
-            state: room.state
-        });
-
-        emitRoomState(roomCode);
-    });
-
-    // --------------------------------------------------------
-    // HÄMTA STATE
-    // --------------------------------------------------------
-
-    socket.on("get_state", () => {
-
-        const roomCode = socket.data.roomCode;
-
-        if (!roomCode) return;
-
-        const room = rooms.get(roomCode);
-
-        if (!room) return;
-
-        socket.emit("game_state", room.state);
-    });
-
-    // --------------------------------------------------------
-    // UPPDATERA SPEL
-    // --------------------------------------------------------
-
-    socket.on("update_state", (state) => {
-
-        const roomCode = socket.data.roomCode;
-
-        if (!roomCode) {
-            console.log("Enhet utan rum försökte uppdatera.");
-            return;
-        }
-
-        const room = rooms.get(roomCode);
-
-        if (!room) return;
-
-        // Endast protokollföraren i DETTA rum får ändra spelet
-        if (socket.id !== room.state.hostId) {
-
-            console.log(
-                "Ej protokollförare försökte uppdatera rum:",
-                roomCode
-            );
-
-            return;
-        }
-
-        room.state = {
-            ...room.state,
-            ...state,
-            hostId: room.state.hostId
-        };
-
-        emitRoomState(roomCode);
-
-        console.log(
-            "Game state uppdaterad i rum:",
-            roomCode
-        );
-    });
-
-    // --------------------------------------------------------
-    // FRÅGA EFTER RUM
-    // --------------------------------------------------------
-
-    socket.on("get_room_state", () => {
-
-        const roomCode = socket.data.roomCode;
-
-        if (!roomCode) return;
-
-        const room = rooms.get(roomCode);
-
-        if (!room) return;
-
-        socket.emit("game_state", room.state);
-    });
-
-    // --------------------------------------------------------
-    // KOPPLA FRÅN
-    // --------------------------------------------------------
-
-    socket.on("disconnect", () => {
-
-        const roomCode = socket.data.roomCode;
-
-        console.log(
-            "Enhet frånkopplad:",
-            socket.id,
-            roomCode || "(inget rum)"
-        );
-
-        if (!roomCode) return;
-
-        const room = rooms.get(roomCode);
-
-        if (!room) return;
-
-        room.sockets.delete(socket.id);
-
-        // Om protokollföraren lämnar:
-        // utse en annan ansluten enhet i samma rum.
-        if (socket.id === room.state.hostId) {
-
-            room.state.hostId = null;
-
-            for (const id of room.sockets) {
-
-                room.state.hostId = id;
-
-                console.log(
-                    "Ny protokollförare i rum:",
-                    roomCode,
-                    id
-                );
-
-                break;
-            }
-        }
-
-        // Om ingen längre finns kvar i rummet
-        if (room.sockets.size === 0) {
-
-            rooms.delete(roomCode);
-
-            console.log(
-                "Tomt rum borttaget:",
-                roomCode
-            );
-
-            return;
-        }
-
-        emitRoomState(roomCode);
-    });
+const PORT = process.env.PORT || 3001;
+server.listen(PORT, () => {
+    console.log(`🎲 Chicago-server körs på port ${PORT}`);
+    console.log(`📡 Väntar på anslutningar...`);
 });
-
-// ============================================================
-// START
-// ============================================================
-
-if (require.main === module) {
-
-    server.listen(PORT, () => {
-
-        console.log("");
-        console.log("======================================");
-        console.log("       CHICAGO RUMSSERVER V2");
-        console.log("======================================");
-        console.log("");
-        console.log(`Server: http://localhost:${PORT}`);
-        console.log("");
-        console.log("Separata rum är aktiverade.");
-        console.log("Varje rum har egen spelstatus.");
-        console.log("");
-    });
-}
-
-module.exports = app;
-
-

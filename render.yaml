@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: chicago-socket-server
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: FRONTEND_URL
+        value: "*"

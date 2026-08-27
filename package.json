@@ -1,6 +1,15 @@
 {
+  "name": "chicago-socket-server",
+  "version": "1.0.0",
+  "description": "Realtids-backend (Express + Socket.io) för Chicago-spelet",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "dependencies": {
-    "@vercel/node": "^8.1.2",
     "express": "^5.2.1",
     "socket.io": "^4.8.3"
   }
