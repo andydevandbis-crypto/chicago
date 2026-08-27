@@ -13,9 +13,8 @@ const io = require('socket.io')(server, {
     }
 });
 
-// Enkel route så Render kan verifiera att tjänsten svarar
-app.get('/', (req, res) => {
-    res.send('Chicago socket-server är igång 🎲');
+// Enkel route så Render kan verifiera att tjänsten svararapp.get('/', (req, res) => {
+    res.sendFile(__dirname + '/index.html');
 });
 
 // ============================================================
