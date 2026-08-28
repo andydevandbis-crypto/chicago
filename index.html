@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
 <title>CHICAGO</title>
+
+<link rel="icon" type="image/png" href="/icons8-cards-16.png">
 
 <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
 
 <style>
-
 * {
     box-sizing: border-box;
     -webkit-tap-highlight-color: transparent;
@@ -17,8 +17,7 @@
     padding: 0;
 }
 
-html,
-body {
+html, body {
     width: 100%;
     min-height: 100%;
     background: #0d0b0a;
@@ -27,8 +26,7 @@ body {
     overflow-x: hidden;
 }
 
-button,
-input {
+button, input {
     font-family: inherit;
     outline: none;
     border: none;
@@ -37,21 +35,16 @@ input {
 :root {
     --gold: #c9a84c;
     --gold-dark: #a8893a;
-    --gold-glow: rgba(201, 168, 76, 0.2);
-
+    --gold-glow: rgba(201,168,76,.2);
     --red: #8b1a1a;
     --red-bright: #c0392b;
-    --red-dark: #5a0e0e;
-
     --bg-main: #0d0b0a;
     --bg-card: #1a1715;
     --border: #2c2824;
-
     --text-primary: #e8e0d8;
     --text-secondary: #a89888;
     --text-muted: #6a6258;
-
-    --shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+    --shadow: 0 2px 12px rgba(0,0,0,.4);
 }
 
 .screen {
@@ -62,55 +55,74 @@ input {
 }
 
 /* ============================================================
-   KNAPPAR
+   GEMENSAMMA KNAPPAR
    ============================================================ */
 
 .btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-
     padding: 12px 28px;
-
     border-radius: 6px;
-
     font-weight: 600;
     font-size: 14px;
-    letter-spacing: 0.5px;
-
+    letter-spacing: .5px;
     color: #1a1a1a;
-
-    background:
-        linear-gradient(
-            180deg,
-            var(--gold),
-            var(--gold-dark)
-        );
-
+    background: linear-gradient(180deg,var(--gold),var(--gold-dark));
     border: 1px solid var(--gold);
-
-    transition: all 0.2s ease;
-
+    transition: all .2s ease;
     cursor: pointer;
-
     min-height: 46px;
     min-width: 140px;
-
     touch-action: manipulation;
-
-    box-shadow:
-        0 2px 10px var(--gold-glow);
+    box-shadow: 0 2px 10px var(--gold-glow);
 }
 
 .btn:hover {
     transform: translateY(-1px);
-
-    box-shadow:
-        0 4px 20px var(--gold-glow);
+    box-shadow: 0 4px 20px var(--gold-glow);
 }
 
 .btn:active {
-    transform: scale(0.96);
+    transform: scale(.96);
+}
+
+/* ============================================================
+   HÖRNESKNAPPAR - Q&A + HELSKÄRM
+   ============================================================ */
+
+.corner-tools {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 900;
+    display: flex;
+    gap: 6px;
+}
+
+.corner-btn {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    min-height: 38px;
+    padding: 0;
+    border-radius: 50%;
+    background: rgba(26,23,21,.94);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,.4);
+}
+
+.corner-btn:hover,
+.corner-btn:active {
+    color: var(--gold);
+    border-color: var(--gold);
 }
 
 /* ============================================================
@@ -122,40 +134,28 @@ input {
     flex-direction: column;
     align-items: center;
     text-align: center;
-
     padding-top: 40px;
 }
 
 .start-title {
     font-size: 44px;
     font-weight: 300;
-
     letter-spacing: 12px;
-
     color: var(--gold);
-
-    text-shadow:
-        0 0 30px rgba(201, 168, 76, 0.08);
 }
 
 .start-subtitle {
     font-size: 10px;
-
     letter-spacing: 4px;
-
     color: var(--text-muted);
-
     margin-top: 4px;
     margin-bottom: 20px;
-
     text-transform: uppercase;
 }
 
 .connection-status {
     font-size: 10px;
-
     letter-spacing: 1.5px;
-
     margin-bottom: 16px;
 }
 
@@ -170,71 +170,42 @@ input {
 .name-frame {
     width: 100%;
     max-width: 440px;
-
     padding: 16px 14px;
-
     background: var(--bg-card);
-
     border: 1px solid var(--border);
-
     border-radius: 8px;
-
     box-shadow: var(--shadow);
-
     margin-bottom: 20px;
 }
 
 .name-row {
     display: flex;
-
     align-items: center;
-
     gap: 8px;
-
     margin: 4px 0;
 }
 
 .name-row label {
     width: 72px;
-
     flex-shrink: 0;
-
     text-align: right;
-
     font-size: 11px;
-
     color: var(--text-secondary);
-
-    letter-spacing: 0.3px;
 }
 
 .name-row input {
     flex: 1;
-
     height: 36px;
-
     padding: 0 12px;
-
     border-radius: 4px;
-
     background: #12100e;
-
     border: 1px solid var(--border);
-
     color: var(--text-primary);
-
     font-size: 14px;
-
-    transition: border-color 0.2s;
 }
 
 .name-row input:focus {
     border-color: var(--gold);
-    background: #1a1715;
-}
-
-.start-btn-wrapper {
-    margin-top: 8px;
 }
 
 /* ============================================================
@@ -244,483 +215,334 @@ input {
 .game-title {
     font-size: 24px;
     font-weight: 300;
-
     letter-spacing: 8px;
-
     color: var(--gold);
-
     text-align: center;
-
     margin: 6px 0 2px;
-
-    opacity: 0.7;
+    opacity: .7;
 }
 
 .round-label {
     font-size: 20px;
     font-weight: 600;
-
     letter-spacing: 2px;
-
     text-align: center;
-
     color: var(--text-primary);
-
-    margin: 0 0 4px;
+    margin-bottom: 4px;
 }
 
 .host-label {
     text-align: center;
-
     font-size: 9px;
-
     letter-spacing: 1.5px;
-
     color: var(--gold);
-
-    opacity: 0.5;
-
+    opacity: .6;
     margin-bottom: 8px;
 }
 
-/* ============================================================
-   TABELL
-   ============================================================ */
-
 .table-wrapper {
     width: 100%;
-
     overflow-x: auto;
-
     padding: 4px 2px;
-
     display: flex;
-
     justify-content: center;
-
     -webkit-overflow-scrolling: touch;
 }
 
 .score-table {
     border-collapse: separate;
-
     border-spacing: 0;
-
     margin: 0 auto;
-
     min-width: max-content;
-
     background: var(--bg-card);
-
     border-radius: 8px;
-
     overflow: hidden;
-
     box-shadow: var(--shadow);
-
     border: 1px solid var(--border);
-
     width: 100%;
 }
 
 .score-table th,
 .score-table td {
     padding: 10px 12px;
-
     text-align: center;
-
     white-space: nowrap;
-
-    border-bottom:
-        1px solid rgba(255, 255, 255, 0.04);
+    border-bottom: 1px solid rgba(255,255,255,.04);
 }
 
-.player-header {
+.player-header,
+.round-header,
+.score-cell,
+.round-total-cell,
+.total-label {
     min-width: 80px;
-
-    font-size: 14px;
-
-    font-weight: 700;
-
-    color: var(--text-primary);
-
-    text-align: center !important;
 }
 
+.player-header,
 .round-header {
-    min-width: 80px;
-
     font-size: 14px;
-
-    font-weight: 600;
-
+    font-weight: 700;
     color: var(--text-primary);
-
-    text-align: center;
+    text-align: center !important;
 }
 
 .sub-header {
     display: block;
-
     font-size: 9px;
-
     color: var(--text-muted);
-
     font-weight: 400;
-
-    letter-spacing: 0.5px;
-}
-
-.score-cell {
-    min-width: 80px;
-
-    text-align: center;
 }
 
 .score-frame {
     display: inline-flex;
-
     align-items: center;
-
     justify-content: center;
-
     gap: 8px;
-
     height: 44px;
 }
 
 .score-btn {
     width: 42px;
-
     min-width: 42px;
-
     height: 42px;
-
     padding: 0;
-
     border-radius: 4px;
-
-    background:
-        rgba(255, 255, 255, 0.06);
-
+    background: rgba(255,255,255,.06);
     border: 1px solid var(--border);
-
     color: var(--text-primary);
-
     font-size: 18px;
-
     font-weight: 700;
-
-    transition: all 0.15s;
-
     cursor: pointer;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
 }
 
 .score-btn:hover {
     background: var(--gold);
-
     border-color: var(--gold);
-
     color: #1a1a1a;
-}
-
-.score-btn:active {
-    transform: scale(0.9);
 }
 
 .score-slash {
     color: var(--text-muted);
-
-    font-size: 16px;
-
-    padding: 0 2px;
-
-    flex-shrink: 0;
 }
 
 .total-row td {
-    background:
-        rgba(201, 168, 76, 0.08);
-
-    border-top:
-        2px solid rgba(201, 168, 76, 0.15);
-
+    background: rgba(201,168,76,.08);
+    border-top: 2px solid rgba(201,168,76,.15);
     padding: 14px 12px;
 }
 
-.total-label {
-    min-width: 80px;
-
-    font-size: 14px;
-
-    font-weight: 700;
-
+.total-label,
+.round-total-cell {
     color: var(--gold);
-
-    text-align: center !important;
-
-    letter-spacing: 0.5px;
+    font-weight: 700;
 }
 
 .round-total-cell {
-    min-width: 80px;
-
     font-size: 18px;
-
-    font-weight: 700;
-
-    color: var(--gold);
-
-    text-align: center;
 }
 
 .current-round-row td {
-    background:
-        rgba(192, 57, 43, 0.06);
+    background: rgba(192,57,43,.06);
 }
 
 .bottom-frame {
     display: flex;
-
     justify-content: center;
-
     align-items: center;
-
     flex-wrap: wrap;
-
     gap: 14px;
-
     width: 100%;
-
     padding: 18px 8px 4px;
 }
 
 /* ============================================================
-   POPUP
+   BANNER
+   ============================================================ */
+
+.banner-container {
+    position: fixed;
+    top: 58px;
+    left: 12px;
+    right: 12px;
+    z-index: 2000;
+    display: flex;
+    justify-content: center;
+    pointer-events: none;
+}
+
+.banner {
+    width: 100%;
+    max-width: 460px;
+    padding: 12px 15px;
+    background: rgba(26,23,21,.97);
+    border: 1px solid var(--gold);
+    border-radius: 7px;
+    box-shadow: 0 8px 30px rgba(0,0,0,.55);
+    text-align: center;
+    animation: bannerIn .25s ease;
+}
+
+.banner-title {
+    color: var(--gold);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.banner-message {
+    color: var(--text-secondary);
+    font-size: 11px;
+    margin-top: 3px;
+    line-height: 1.4;
+}
+
+.banner.hide {
+    animation: bannerOut .3s ease forwards;
+}
+
+@keyframes bannerIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes bannerOut {
+    to {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+}
+
+/* ============================================================
+   POPUP - ENDAST FÖR SPELPOÄNG / Q&A
    ============================================================ */
 
 .popup-overlay {
     position: fixed;
-
     inset: 0;
-
     z-index: 1000;
-
     display: flex;
-
     justify-content: center;
-
     align-items: center;
-
     padding: 16px;
-
-    background:
-        rgba(0, 0, 0, 0.7);
-
+    background: rgba(0,0,0,.7);
     backdrop-filter: blur(4px);
 }
 
 .popup {
     width: 100%;
-
     max-width: 480px;
-
-    max-height:
-        calc(100vh - 32px);
-
+    max-height: calc(100vh - 32px);
     overflow-y: auto;
-
     padding: 20px 18px;
-
     background: var(--bg-card);
-
     border: 1px solid var(--border);
-
     border-radius: 10px;
-
-    box-shadow:
-        0 16px 48px rgba(0, 0, 0, 0.6);
+    box-shadow: 0 16px 48px rgba(0,0,0,.6);
 }
 
 .popup-title {
     text-align: center;
-
     font-size: 18px;
-
     font-weight: 600;
-
     color: var(--text-primary);
-
-    margin: 0 0 12px;
+    margin-bottom: 12px;
 }
 
 .combination-grid {
     display: grid;
-
     grid-template-columns: 1fr 1fr;
-
     gap: 6px;
 }
 
 .combination-btn {
     padding: 10px 6px;
-
     border-radius: 4px;
-
-    background:
-        rgba(255, 255, 255, 0.04);
-
+    background: rgba(255,255,255,.04);
     border: 1px solid var(--border);
-
     color: var(--text-secondary);
-
     font-size: 11px;
-
-    font-weight: 500;
-
-    transition: all 0.15s;
-
     cursor: pointer;
-
     min-height: 40px;
 }
 
-.combination-btn:hover {
-    background:
-        rgba(255, 255, 255, 0.06);
-
+.combination-btn.selected,
+.outplay-btn.selected {
+    background: linear-gradient(180deg,var(--gold),var(--gold-dark));
     border-color: var(--gold);
-
-    color: var(--text-primary);
-}
-
-.combination-btn.selected {
-    background:
-        linear-gradient(
-            180deg,
-            var(--gold),
-            var(--gold-dark)
-        );
-
-    border-color: var(--gold);
-
     color: #1a1a1a;
-
-    box-shadow:
-        0 2px 12px var(--gold-glow);
 }
 
 .outplay-section {
     margin-top: 12px;
-
     text-align: center;
 }
 
 .outplay-btn {
     padding: 8px 20px;
-
     border-radius: 4px;
-
-    background:
-        rgba(255, 255, 255, 0.04);
-
+    background: rgba(255,255,255,.04);
     border: 1px solid var(--border);
-
     color: var(--text-secondary);
-
-    font-size: 11px;
-
-    font-weight: 600;
-
-    transition: all 0.15s;
-
     cursor: pointer;
-
     min-height: 36px;
-}
-
-.outplay-btn:hover {
-    background:
-        rgba(255, 255, 255, 0.06);
-
-    border-color: var(--gold);
-}
-
-.outplay-btn.selected {
-    background:
-        linear-gradient(
-            180deg,
-            var(--gold),
-            var(--gold-dark)
-        );
-
-    border-color: var(--gold);
-
-    color: #1a1a1a;
-
-    box-shadow:
-        0 2px 12px var(--gold-glow);
 }
 
 .popup-buttons {
     display: flex;
-
     justify-content: center;
-
     gap: 8px;
-
     margin-top: 14px;
 }
 
 .popup-btn {
     padding: 10px 24px;
-
     border-radius: 4px;
-
     font-size: 12px;
-
     font-weight: 600;
-
     cursor: pointer;
-
-    transition: all 0.15s;
-
     min-height: 40px;
 }
 
 .popup-btn-save {
-    background:
-        linear-gradient(
-            180deg,
-            var(--gold),
-            var(--gold-dark)
-        );
-
+    background: linear-gradient(180deg,var(--gold),var(--gold-dark));
     color: #1a1a1a;
-
-    border: none;
 }
 
 .popup-btn-cancel {
-    background:
-        rgba(255, 255, 255, 0.04);
-
+    background: rgba(255,255,255,.04);
     color: var(--text-secondary);
-
     border: 1px solid var(--border);
 }
 
-.popup-btn-cancel:hover {
-    background:
-        rgba(255, 255, 255, 0.06);
+/* ============================================================
+   FAQ
+   ============================================================ */
 
-    color: var(--text-primary);
+.faq-content {
+    color: var(--text-secondary);
+    font-size: 12px;
+    line-height: 1.55;
+}
+
+.faq-item {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.faq-item:last-child {
+    border-bottom: 0;
+}
+
+.faq-question {
+    color: var(--gold);
+    font-weight: 700;
+    margin-bottom: 4px;
 }
 
 /* ============================================================
@@ -729,134 +551,81 @@ input {
 
 .stats-title {
     text-align: center;
-
     font-size: 32px;
-
     font-weight: 300;
-
     letter-spacing: 6px;
-
     color: var(--gold);
-
-    margin-bottom: 2px;
 }
 
 .stats-subtitle {
     text-align: center;
-
     font-size: 11px;
-
     letter-spacing: 2px;
-
     color: var(--text-muted);
-
     margin-bottom: 16px;
 }
 
 .stats-list {
     width: 100%;
-
     max-width: 820px;
-
     margin: 0 auto;
 }
 
 .stats-card {
     margin-bottom: 10px;
-
     padding: 14px 16px;
-
     background: var(--bg-card);
-
     border: 1px solid var(--border);
-
-    border-left:
-        3px solid var(--gold);
-
+    border-left: 3px solid var(--gold);
     border-radius: 6px;
-
     text-align: center;
-
-    box-shadow: var(--shadow);
 }
 
 .stats-player {
     font-size: 20px;
-
     font-weight: 700;
-
     color: var(--text-primary);
-
     margin-bottom: 10px;
-
-    letter-spacing: 0.5px;
 }
 
 .stats-grid {
     display: grid;
-
-    grid-template-columns:
-        repeat(4, 1fr);
-
+    grid-template-columns: repeat(4,1fr);
     gap: 6px;
 }
 
 .stat-box {
     padding: 8px 4px;
-
-    text-align: center;
-
-    background:
-        rgba(255, 255, 255, 0.03);
-
+    background: rgba(255,255,255,.03);
     border-radius: 4px;
-
     min-height: 44px;
 }
 
 .stat-number {
     font-size: 18px;
-
     font-weight: 700;
-
     color: var(--gold);
-
-    line-height: 22px;
 }
 
 .stat-label {
     font-size: 9px;
-
     text-transform: uppercase;
-
-    letter-spacing: 0.5px;
-
     color: var(--text-secondary);
-
     margin-top: 2px;
-
     font-weight: 600;
 }
 
 .live-stat {
-    border:
-        1px solid rgba(201, 168, 76, 0.15);
-
-    background:
-        rgba(201, 168, 76, 0.05);
+    border: 1px solid rgba(201,168,76,.15);
+    background: rgba(201,168,76,.05);
 }
 
 .stats-buttons {
     display: flex;
-
     justify-content: center;
-
     align-items: center;
-
     flex-wrap: wrap;
-
     gap: 10px;
-
     margin-top: 16px;
 }
 
@@ -866,72 +635,44 @@ input {
 
 .winner-screen {
     display: flex;
-
     flex-direction: column;
-
     align-items: center;
-
     justify-content: center;
-
     text-align: center;
-
     min-height: 100vh;
-
     padding: 24px 16px;
-
-    background: var(--bg-main);
 }
 
 .winner-title {
     font-size: 40px;
-
     font-weight: 300;
-
-    letter-spacing: 4px;
-
     color: var(--gold);
-
-    text-shadow:
-        0 0 40px rgba(201, 168, 76, 0.08);
 }
 
 .winner-name {
     font-size: 28px;
-
     font-weight: 600;
-
-    color: var(--text-primary);
-
     margin-top: 12px;
 }
 
 .winner-score {
     font-size: 20px;
-
     font-weight: 700;
-
     color: var(--gold);
-
     margin-top: 6px;
 }
 
 .winner-message {
     color: var(--text-secondary);
-
     font-size: 13px;
-
     margin-top: 6px;
 }
 
 .winner-buttons {
     display: flex;
-
     gap: 10px;
-
     flex-wrap: wrap;
-
     justify-content: center;
-
     margin-top: 20px;
 }
 
@@ -941,36 +682,21 @@ input {
 
 .confetti {
     position: fixed;
-
     top: -20px;
-
     width: 6px;
-
     height: 10px;
-
     z-index: 9999;
-
     pointer-events: none;
-
-    animation:
-        confettiFall linear forwards;
+    animation: confettiFall linear forwards;
 }
 
 @keyframes confettiFall {
-
-    0% {
-        transform:
-            translateY(0)
-            rotate(0deg);
-
+    from {
+        transform: translateY(0) rotate(0);
         opacity: 1;
     }
-
-    100% {
-        transform:
-            translateY(110vh)
-            rotate(720deg);
-
+    to {
+        transform: translateY(110vh) rotate(720deg);
         opacity: 0;
     }
 }
@@ -979,8 +705,7 @@ input {
    MOBIL
    ============================================================ */
 
-@media (max-width: 600px) {
-
+@media (max-width:600px) {
     .start-title {
         font-size: 30px;
         letter-spacing: 8px;
@@ -1004,20 +729,7 @@ input {
     }
 
     .stats-grid {
-        grid-template-columns:
-            repeat(2, 1fr);
-    }
-
-    .stats-card {
-        padding: 12px;
-    }
-
-    .stat-box {
-        min-height: 40px;
-    }
-
-    .stat-number {
-        font-size: 16px;
+        grid-template-columns: repeat(2,1fr);
     }
 
     .stats-player {
@@ -1025,96 +737,44 @@ input {
     }
 
     .combination-grid {
-        grid-template-columns:
-            1fr 1fr;
-
         gap: 4px;
     }
 
     .combination-btn {
         font-size: 10px;
-
         padding: 8px 4px;
-
         min-height: 34px;
     }
 
     .btn {
         padding: 10px 20px;
-
         font-size: 13px;
-
         min-height: 42px;
-
         min-width: 120px;
     }
 
-    .player-header {
-        min-width: 60px;
-
-        font-size: 12px;
-    }
-
-    .round-header {
-        min-width: 60px;
-
-        font-size: 12px;
-    }
-
-    .score-cell {
+    .player-header,
+    .round-header,
+    .score-cell,
+    .round-total-cell,
+    .total-label {
         min-width: 60px;
     }
 
     .score-btn {
         width: 36px;
-
         min-width: 36px;
-
         height: 36px;
-
         font-size: 16px;
-    }
-
-    .round-total-cell {
-        min-width: 60px;
-
-        font-size: 16px;
-    }
-
-    .total-label {
-        min-width: 60px;
-
-        font-size: 11px;
     }
 
     .score-table th,
     .score-table td {
-        padding: 8px 8px;
-    }
-
-    .name-row label {
-        width: 60px;
-
-        font-size: 10px;
-    }
-
-    .name-row input {
-        height: 32px;
-
-        font-size: 13px;
-    }
-
-    .popup {
-        padding: 16px 14px;
-    }
-
-    .popup-title {
-        font-size: 16px;
+        padding: 8px;
     }
 }
 
-@media (max-width: 400px) {
-
+@media (max-width:400px) {
     .start-title {
         font-size: 24px;
         letter-spacing: 6px;
@@ -1131,44 +791,17 @@ input {
 
     .score-btn {
         width: 30px;
-
         min-width: 30px;
-
         height: 30px;
-
         font-size: 14px;
     }
 
-    .score-slash {
-        font-size: 12px;
-    }
-
-    .player-header {
-        min-width: 50px;
-
-        font-size: 10px;
-    }
-
-    .round-header {
-        min-width: 50px;
-
-        font-size: 10px;
-    }
-
-    .score-cell {
-        min-width: 50px;
-    }
-
-    .round-total-cell {
-        min-width: 50px;
-
-        font-size: 14px;
-    }
-
+    .player-header,
+    .round-header,
+    .score-cell,
+    .round-total-cell,
     .total-label {
         min-width: 50px;
-
-        font-size: 10px;
     }
 
     .score-table th,
@@ -1178,220 +811,72 @@ input {
 
     .btn {
         padding: 8px 16px;
-
         font-size: 12px;
-
         min-height: 38px;
-
         min-width: 100px;
     }
 }
-
-::-webkit-scrollbar {
-    width: 4px;
-    height: 4px;
-}
-
-::-webkit-scrollbar-track {
-    background: var(--bg-main);
-}
-
-::-webkit-scrollbar-thumb {
-    background: var(--border);
-
-    border-radius: 2px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: var(--gold);
-}
-
 </style>
 </head>
 
 <body>
 
 <div id="app"></div>
+<div id="banner-container" class="banner-container"></div>
 
 <script>
 
-// ============================================================
-// SOCKET
-// ============================================================
+/* ============================================================
+   SOCKET
+   ============================================================ */
 
-const socket =
-    io('https://chicago-9cud.onrender.com');
+const socket = io('https://chicago-9cud.onrender.com');
 
 let connected = false;
-
 let hostId = null;
+let roomCode = localStorage.getItem("chicago_room") || null;
 
-let roomCode =
-    localStorage.getItem("chicago_room") || null;
+const app = document.getElementById("app");
+const bannerContainer = document.getElementById("banner-container");
 
-// ============================================================
-// KLIENT-ID
-// ============================================================
-// Detta identifierar just denna webbläsare/enhet.
-// Det är INTE samma sak som socket.id.
-// ============================================================
-
-let clientId =
-    localStorage.getItem("chicago_client_id");
-
-if (!clientId) {
-
-    clientId =
-        "client_" +
-        Date.now() +
-        "_" +
-        Math.random()
-            .toString(36)
-            .substring(2, 12);
-
-    localStorage.setItem(
-        "chicago_client_id",
-        clientId
-    );
-}
-
-// Informera servern om vem klienten är.
-socket.on("connect", () => {
-
-    socket.emit(
-        "identify_client",
-        clientId
-    );
-});
-
-// ============================================================
-// RUM SOM DENNA KLIENT HAR RESETAT FRÅN
-// ============================================================
-
-function getExitedRooms() {
-
-    try {
-
-        const data =
-            JSON.parse(
-                localStorage.getItem(
-                    "chicago_exited_rooms"
-                ) || "[]"
-            );
-
-        return Array.isArray(data)
-            ? data
-            : [];
-
-    } catch (error) {
-
-        return [];
-    }
-}
-
-function saveExitedRoom(code) {
-
-    if (!code) return;
-
-    const rooms =
-        getExitedRooms();
-
-    const normalized =
-        String(code)
-            .trim()
-            .toUpperCase();
-
-    if (!rooms.includes(normalized)) {
-
-        rooms.push(normalized);
-
-        localStorage.setItem(
-            "chicago_exited_rooms",
-            JSON.stringify(rooms)
-        );
-    }
-}
-
-function hasExitedRoom(code) {
-
-    if (!code) return false;
-
-    const normalized =
-        String(code)
-            .trim()
-            .toUpperCase();
-
-    return getExitedRooms()
-        .includes(normalized);
-}
-
-// ============================================================
-// SPEL
-// ============================================================
+/* ============================================================
+   SPEL
+   ============================================================ */
 
 const ANTAL_SPELARE = 6;
 
 let players = [];
-
 let scores = {};
-
 let currentRound = 0;
-
 let activePlayerIndex = 0;
-
 let gameStarted = false;
-
 let gameFinished = false;
-
 let statistics = {};
-
 let currentScreen = "start";
-
 let previousWinner = null;
-
-// ============================================================
-// KOMBINATIONER
-// ============================================================
-
-const COMBINATIONS = [
-
-    ["0 poäng", 0, "zero"],
-
-    ["Par 1 poäng", 1, "par"],
-
-    ["Två par 2 poäng", 2, "tvapar"],
-
-    ["Triss 3 poäng", 3, "triss"],
-
-    ["Stege 4 poäng", 4, "stege"],
-
-    ["Färg 5 poäng", 5, "farg"],
-
-    ["Kåk 6 poäng", 6, "kak"],
-
-    ["Fyrtal 8 poäng", 8, "fyrtal"],
-
-    ["Färgstege 11 poäng", 11, "fargstege"],
-
-    ["Royal Flush 20 poäng", 20, "royal"],
-
-    ["Chicago +15", 15, "chicago_plus"],
-
-    ["Chicago -15", -15, "chicago_minus"]
-
-];
 
 const OUTPLAY_POINTS = 5;
 
-const app =
-    document.getElementById("app");
+const COMBINATIONS = [
+    ["0 poäng",0,"zero"],
+    ["Par 1 poäng",1,"par"],
+    ["Två par 2 poäng",2,"tvapar"],
+    ["Triss 3 poäng",3,"triss"],
+    ["Stege 4 poäng",4,"stege"],
+    ["Färg 5 poäng",5,"farg"],
+    ["Kåk 6 poäng",6,"kak"],
+    ["Fyrtal 8 poäng",8,"fyrtal"],
+    ["Färgstege 11 poäng",11,"fargstege"],
+    ["Royal Flush 20 poäng",20,"royal"],
+    ["Chicago +15",15,"chicago_plus"],
+    ["Chicago -15",-15,"chicago_minus"]
+];
 
-// ============================================================
-// HOST
-// ============================================================
+/* ============================================================
+   HJÄLP
+   ============================================================ */
 
 function isHost() {
-
     return !!(
         socket.id &&
         hostId &&
@@ -1399,93 +884,232 @@ function isHost() {
     );
 }
 
-// ============================================================
-// STATISTIK
-// ============================================================
+function el(tag, cls = "", html = "") {
+    const e = document.createElement(tag);
 
-function createEmptyStats() {
+    if (cls) e.className = cls;
+    if (html !== "") e.innerHTML = html;
 
-    return {
+    return e;
+}
 
-        games: 0,
+function button(text, cls, onClick) {
+    const b = el("button", `btn ${cls}`, text);
 
-        wins: 0,
+    if (onClick) b.onclick = onClick;
 
-        totalPoints: 0,
+    return b;
+}
 
-        rounds: 0,
+/* ============================================================
+   BANNER
+   ============================================================ */
 
-        zero: 0,
+let bannerTimer = null;
 
-        par: 0,
+function showBanner(title, message, duration = 3500) {
 
-        tvapar: 0,
+    if (bannerTimer) {
+        clearTimeout(bannerTimer);
+        bannerTimer = null;
+    }
 
-        triss: 0,
+    bannerContainer.innerHTML = "";
 
-        stege: 0,
+    const banner = el("div", "banner");
 
-        farg: 0,
+    banner.appendChild(
+        el("div", "banner-title", title)
+    );
 
-        kak: 0,
+    banner.appendChild(
+        el("div", "banner-message", message)
+    );
 
-        fyrtal: 0,
+    bannerContainer.appendChild(banner);
 
-        fargstege: 0,
+    bannerTimer = setTimeout(() => {
 
-        royal: 0,
+        banner.classList.add("hide");
 
-        chicago_plus: 0,
+        setTimeout(() => {
+            if (banner.parentNode) {
+                banner.remove();
+            }
+        }, 300);
 
-        chicago_minus: 0,
+    }, duration);
+}
 
-        outplay: 0,
+/* ============================================================
+   FAQ
+   ============================================================ */
 
-        highestScore: 0,
+function showFAQ() {
 
-        highestRound: 0
+    const overlay = el("div", "popup-overlay");
+    const popup = el("div", "popup");
 
+    popup.appendChild(
+        el("div", "popup-title", "Q&A")
+    );
+
+    const content = el("div", "faq-content");
+
+    const items = [
+        [
+            "Vad händer om protokollföraren lämnar?",
+            "Spelet fortsätter. En kvarvarande spelare utses automatiskt till ny protokollförare."
+        ],
+        [
+            "Vad händer om mobilen eller internet dör?",
+            "Spelet ligger kvar på servern. Ett tillfälligt avbrott avslutar inte spelet."
+        ],
+        [
+            "Påverkas statistiken om någon lämnar?",
+            "Nej. Pågående spel och sparad statistik ligger kvar."
+        ],
+        [
+            "Vad gör AVBRYT SESSION?",
+            "Den här enheten lämnar den aktuella sessionen och går tillbaka till startsidan."
+        ]
+    ];
+
+    items.forEach(([question, answer]) => {
+
+        const item = el("div", "faq-item");
+
+        item.appendChild(
+            el("div", "faq-question", question)
+        );
+
+        item.appendChild(
+            el("div", "", answer)
+        );
+
+        content.appendChild(item);
+    });
+
+    popup.appendChild(content);
+
+    const actions = el("div", "popup-buttons");
+
+    const close = el(
+        "button",
+        "popup-btn popup-btn-save",
+        "STÄNG"
+    );
+
+    close.onclick = () => {
+        overlay.remove();
     };
 
+    actions.appendChild(close);
+    popup.appendChild(actions);
+
+    overlay.appendChild(popup);
+    document.body.appendChild(overlay);
+}
+
+/* ============================================================
+   HELSKÄRM
+   ============================================================ */
+
+function toggleFullscreen() {
+
+    if (!document.fullscreenElement) {
+
+        if (document.documentElement.requestFullscreen) {
+            document.documentElement.requestFullscreen()
+                .catch(() => {
+                    showBanner(
+                        "HELSKÄRM",
+                        "Helskärm stöds inte av den här webbläsaren."
+                    );
+                });
+        }
+
+    } else {
+
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        }
+    }
+}
+
+function createCornerTools() {
+
+    const tools = el("div", "corner-tools");
+
+    const faq = el("button", "corner-btn", "?");
+    faq.title = "Q&A";
+    faq.onclick = showFAQ;
+
+    const fullscreen = el("button", "corner-btn", "⛶");
+    fullscreen.title = "Helskärm";
+    fullscreen.onclick = toggleFullscreen;
+
+    tools.appendChild(faq);
+    tools.appendChild(fullscreen);
+
+    document.body.appendChild(tools);
+}
+
+function removeCornerTools() {
+
+    document
+        .querySelectorAll(".corner-tools")
+        .forEach(e => e.remove());
+}
+
+/* ============================================================
+   STATISTIK
+   ============================================================ */
+
+function createEmptyStats() {
+    return {
+        games: 0,
+        wins: 0,
+        totalPoints: 0,
+        rounds: 0,
+        zero: 0,
+        par: 0,
+        tvapar: 0,
+        triss: 0,
+        stege: 0,
+        farg: 0,
+        kak: 0,
+        fyrtal: 0,
+        fargstege: 0,
+        royal: 0,
+        chicago_plus: 0,
+        chicago_minus: 0,
+        outplay: 0,
+        highestScore: 0,
+        highestRound: 0
+    };
 }
 
 function ensureStats(player) {
 
     if (!statistics[player]) {
-
-        statistics[player] =
-            createEmptyStats();
+        statistics[player] = createEmptyStats();
     }
 }
 
-// ============================================================
-// SOCKET EVENTS
-// ============================================================
+/* ============================================================
+   SOCKET EVENTS
+   ============================================================ */
 
 socket.on("connect", () => {
 
     connected = true;
 
-    socket.emit(
-        "identify_client",
-        clientId
-    );
+    const savedRoom = localStorage.getItem("chicago_room");
 
-    const savedRoom =
-        localStorage.getItem(
-            "chicago_room"
-        );
+    if (savedRoom) {
 
-    // --------------------------------------------------------
-    // Viktigt:
-    // Om användaren har resetat från ett rum ska vi INTE
-    // automatiskt ansluta igen.
-    // --------------------------------------------------------
-
-    if (savedRoom && !hasExitedRoom(savedRoom)) {
-
-        roomCode =
-            savedRoom.toUpperCase();
+        roomCode = savedRoom.toUpperCase();
 
         socket.emit(
             "join_room",
@@ -1494,90 +1118,71 @@ socket.on("connect", () => {
 
     } else {
 
-        roomCode = null;
-
-        localStorage.removeItem(
-            "chicago_room"
-        );
-
         startScreen();
     }
 });
-
-// ============================================================
-// RUM SKAPAT
-// ============================================================
 
 socket.on("room_created", data => {
 
     if (!data || !data.roomCode) return;
 
-    roomCode =
-        data.roomCode;
+    roomCode = data.roomCode;
 
     localStorage.setItem(
         "chicago_room",
         roomCode
     );
 
-    hostId =
-        data.hostId || socket.id;
+    hostId = data.hostId || socket.id;
 
     startScreen();
 });
-
-// ============================================================
-// RUM JOINAT
-// ============================================================
 
 socket.on("room_joined", data => {
 
     if (!data || !data.roomCode) return;
 
-    roomCode =
-        data.roomCode.toUpperCase();
+    roomCode = data.roomCode;
 
     localStorage.setItem(
         "chicago_room",
         roomCode
     );
 
-    hostId =
-        data.hostId || null;
+    hostId = data.hostId || null;
 
     socket.emit("get_state");
 });
 
-// ============================================================
-// RUMFEL
-// ============================================================
-
 socket.on("room_error", message => {
 
-    alert(
-        message ||
-        "Kunde inte ansluta till rummet."
-    );
-
     roomCode = null;
-
-    hostId = null;
 
     localStorage.removeItem(
         "chicago_room"
     );
 
+    hostId = null;
+
     startScreen();
+
+    showBanner(
+        "KUNDE INTE ANSLUTA",
+        message || "Rummet finns inte längre."
+    );
 });
 
-// ============================================================
-// INGET RUM
-// ============================================================
+socket.on("action_error", message => {
+
+    showBanner(
+        "EJ TILLÅTET",
+        message || "Åtgärden kunde inte genomföras."
+    );
+});
 
 socket.on("no_room", () => {
 
     roomCode = null;
-
     hostId = null;
 
     localStorage.removeItem(
@@ -1587,117 +1192,88 @@ socket.on("no_room", () => {
     startScreen();
 });
 
-// ============================================================
-// SESSION RESETAD
-// ============================================================
-
-socket.on("session_reset", data => {
-
-    const oldRoom =
-        data?.roomCode || roomCode;
-
-    if (oldRoom) {
-
-        saveExitedRoom(oldRoom);
-    }
+socket.on("session_left", () => {
 
     roomCode = null;
-
     hostId = null;
-
-    players = [];
-
-    scores = {};
-
-    currentRound = 0;
-
-    activePlayerIndex = 0;
-
-    gameStarted = false;
-
-    gameFinished = false;
-
-    previousWinner = null;
-
-    // --------------------------------------------------------
-    // OBS:
-    // statistics rensas INTE.
-    // Det som redan finns sparat i klienten behålls.
-    // --------------------------------------------------------
 
     localStorage.removeItem(
         "chicago_room"
     );
 
-    currentScreen = "start";
+    players = [];
+    scores = {};
+    currentRound = 0;
+    activePlayerIndex = 0;
+    gameStarted = false;
+    gameFinished = false;
+    statistics = {};
+    previousWinner = null;
 
     startScreen();
+
+    showBanner(
+        "SESSION AVBRUTEN",
+        "Du har lämnat spelet på den här enheten."
+    );
 });
 
-// ============================================================
-// HOST DISCONNECT
-// ============================================================
+socket.on("host_changed", data => {
 
-socket.on("host_disconnected", () => {
+    if (!data) return;
 
-    // Spelet ska inte raderas.
-    // De andra får bara information om att hosten försvunnit.
+    hostId = data.newHostId || hostId;
 
     if (
-        currentScreen === "game" ||
-        currentScreen === "stats" ||
-        currentScreen === "winner"
+        socket.id === data.newHostId
     ) {
 
-        setTimeout(() => {
-
-            alert(
-                "Protokollföraren har kopplats från."
-            );
-
-        }, 100);
+        showBanner(
+            "NY PROTOKOLLFÖRARE",
+            `${data.newHostName || "Den tidigare protokollföraren"} har lämnat sessionen. Du är nu protokollförare.`,
+            5000
+        );
     }
 });
 
-// ============================================================
-// DISCONNECT
-// ============================================================
+socket.on("session_notice", data => {
+
+    if (!data) return;
+
+    showBanner(
+        data.title || "INFORMATION",
+        data.message || ""
+    );
+});
 
 socket.on("disconnect", () => {
 
     connected = false;
 
+    showBanner(
+        "ANSLUTNINGEN FÖRSVANN",
+        "Försöker ansluta igen. Spelet finns kvar på servern.",
+        5000
+    );
+
     if (currentScreen === "game") {
-
         gameScreen();
-
     } else if (currentScreen === "stats") {
-
         showStatistics();
-
-    } else if (currentScreen === "winner") {
-
-        // Behåll vinnarsidan.
-
     } else {
-
         startScreen();
     }
 });
-
-// ============================================================
-// GAME STATE
-// ============================================================
 
 socket.on("game_state", state => {
 
     if (!state) return;
 
     roomCode =
-        state.roomCode || roomCode;
+        state.roomCode ||
+        roomCode;
 
     if (roomCode) {
-
         localStorage.setItem(
             "chicago_room",
             roomCode
@@ -1705,20 +1281,18 @@ socket.on("game_state", state => {
     }
 
     players =
-        state.players || [];
+        Array.isArray(state.players)
+            ? state.players
+            : [];
 
     scores =
         state.scores || {};
 
     currentRound =
-        Number(
-            state.currentRound || 0
-        );
+        Number(state.currentRound || 0);
 
     activePlayerIndex =
-        Number(
-            state.activePlayerIndex || 0
-        );
+        Number(state.activePlayerIndex || 0);
 
     gameStarted =
         !!state.started;
@@ -1736,16 +1310,13 @@ socket.on("game_state", state => {
         currentScreen === "stats" &&
         gameStarted
     ) {
-
         showStatistics();
-
         return;
     }
 
     if (gameStarted) {
 
         gameFinished = false;
-
         gameScreen();
 
     } else {
@@ -1754,100 +1325,95 @@ socket.on("game_state", state => {
     }
 });
 
-// ============================================================
-// SKICKA STATE
-// ============================================================
+/* ============================================================
+   SKICKA STATE
+   ============================================================ */
 
 function sendState() {
 
     if (!isHost()) {
 
-        alert(
-            "Endast protokollföraren kan göra detta."
+        showBanner(
+            "EJ PROTOKOLLFÖRARE",
+            "Endast protokollföraren kan ändra spelet."
         );
 
         return;
     }
 
+    socket.emit("update_state", {
+
+        players,
+        scores,
+        currentRound,
+        activePlayerIndex,
+
+        started: players.length > 0,
+
+        statistics,
+        previousWinner
+    });
+}
+
+/* ============================================================
+   REGISTER PLAYER
+   ============================================================ */
+
+function registerCurrentPlayer(name) {
+
+    if (!name) return;
+
     socket.emit(
-        "update_state",
-        {
-            players,
-            scores,
-            currentRound,
-            activePlayerIndex,
-
-            started:
-                players.length > 0,
-
-            statistics,
-
-            previousWinner
-        }
+        "register_player",
+        name
     );
 }
 
-// ============================================================
-// TOTAL
-// ============================================================
+/* ============================================================
+   TOTAL
+   ============================================================ */
 
 function calculateTotal(player) {
 
     let total = 0;
 
-    const data =
-        scores[player];
+    const data = scores[player];
 
     if (!data) return 0;
 
     for (const round of data) {
 
         if (round?.s1) {
-
-            total +=
-                Number(
-                    round.s1.total || 0
-                );
+            total += Number(
+                round.s1.total || 0
+            );
         }
 
         if (round?.s2) {
-
-            total +=
-                Number(
-                    round.s2.total || 0
-                );
+            total += Number(
+                round.s2.total || 0
+            );
         }
     }
 
     return total;
 }
 
-// ============================================================
-// STARTA SPEL
-// ============================================================
+/* ============================================================
+   STARTA SPEL
+   ============================================================ */
 
 function startGame(names) {
 
-    if (!isHost()) {
+    if (!isHost()) return;
 
-        alert(
-            "Du är inte protokollförare."
-        );
-
-        return;
-    }
-
-    players =
-        names.map(
-            n => n.trim()
-        );
+    players = names.map(
+        n => n.trim()
+    );
 
     currentRound = 0;
-
     gameFinished = false;
-
     currentScreen = "game";
-
     scores = {};
 
     if (
@@ -1856,9 +1422,7 @@ function startGame(names) {
     ) {
 
         activePlayerIndex =
-            players.indexOf(
-                previousWinner
-            );
+            players.indexOf(previousWinner);
 
     } else {
 
@@ -1879,26 +1443,22 @@ function startGame(names) {
         statistics[player].games++;
     }
 
+    registerCurrentPlayer(
+        players[0]
+    );
+
     sendState();
 }
-
-// ============================================================
-// NYTT SPEL MED SAMMA SPELARE
-// ============================================================
 
 function startNewGameWithSamePlayers() {
 
-    if (
-        !isHost() ||
-        !players.length
-    ) return;
+    if (!isHost() || !players.length) {
+        return;
+    }
 
     currentRound = 0;
-
     gameFinished = false;
-
     currentScreen = "game";
-
     scores = {};
 
     if (
@@ -1907,9 +1467,7 @@ function startNewGameWithSamePlayers() {
     ) {
 
         activePlayerIndex =
-            players.indexOf(
-                previousWinner
-            );
+            players.indexOf(previousWinner);
 
     } else {
 
@@ -1933,94 +1491,9 @@ function startNewGameWithSamePlayers() {
     sendState();
 }
 
-// ============================================================
-// RENDER HELPERS
-// ============================================================
-
-function el(
-    tag,
-    cls = '',
-    html = ''
-) {
-
-    const e =
-        document.createElement(tag);
-
-    if (cls) {
-
-        e.className = cls;
-    }
-
-    if (html) {
-
-        e.innerHTML = html;
-    }
-
-    return e;
-}
-
-function button(
-    text,
-    cls,
-    onClick
-) {
-
-    const b =
-        el(
-            'button',
-            `btn ${cls}`,
-            text
-        );
-
-    if (onClick) {
-
-        b.onclick = onClick;
-    }
-
-    return b;
-}
-
-// ============================================================
-// RESET SESSION
-// ============================================================
-
-function resetSession() {
-
-    if (
-        !confirm(
-            "Avsluta din session?\n\n" +
-            "Du lämnar spelet och kommer tillbaka till startsidan.\n\n" +
-            "Det pågående spelet påverkas inte för de andra."
-        )
-    ) {
-        return;
-    }
-
-    // Om vi har ett rum:
-    if (roomCode) {
-
-        socket.emit(
-            "reset_session"
-        );
-
-        return;
-    }
-
-    // Om vi redan saknar rum:
-    roomCode = null;
-
-    hostId = null;
-
-    localStorage.removeItem(
-        "chicago_room"
-    );
-
-    startScreen();
-}
-
-// ============================================================
-// STARTSKÄRM
-// ============================================================
+/* ============================================================
+   STARTSKÄRM
+   ============================================================ */
 
 function startScreen() {
 
@@ -2028,11 +1501,11 @@ function startScreen() {
 
     app.innerHTML = "";
 
+    removeCornerTools();
+    createCornerTools();
+
     const screen =
-        el(
-            "div",
-            "screen start-screen"
-        );
+        el("div","screen start-screen");
 
     screen.appendChild(
         el(
@@ -2053,11 +1526,7 @@ function startScreen() {
     const status =
         el(
             "div",
-            `connection-status ${
-                connected
-                    ? "connected"
-                    : "disconnected"
-            }`,
+            `connection-status ${connected ? "connected" : "disconnected"}`,
             connected
                 ? "● SERVER ANSLUTEN"
                 : "● SERVER EJ ANSLUTEN"
@@ -2065,26 +1534,27 @@ function startScreen() {
 
     screen.appendChild(status);
 
-    // ========================================================
-    // INGET AKTIVT RUM
-    // ========================================================
-
     if (!roomCode) {
 
         const box =
-            el(
-                "div",
-                "name-frame"
-            );
+            el("div","name-frame");
 
-        box.appendChild(
-            el(
-                "div",
-                "",
-                "SKAPA ELLER GÅ MED I SPEL"
-            )
-        );
+        /*
+         * DETTA OMRÅDE ÄR MEDVETET LÄMNAT
+         * SOM I DIN NUVARANDE VERSION.
+         */
 
+const title = el(
+    "div",
+    "",
+    "SKAPA ELLER GÅ MED I SPEL"
+);
+
+title.style.cssText =
+    "text-align:center;color:var(--text-secondary);font-size:11px;letter-spacing:1px;margin-bottom:12px;";
+
+box.appendChild(title);
+       
         const createBtn =
             button(
                 "SKAPA NYTT SPEL",
@@ -2093,7 +1563,8 @@ function startScreen() {
 
                     if (!connected) {
 
-                        alert(
+                        showBanner(
+                            "EJ ANSLUTEN",
                             "Servern är inte ansluten."
                         );
 
@@ -2116,40 +1587,19 @@ function startScreen() {
             );
 
         divider.style.cssText =
-            "text-align:center;" +
-            "color:var(--text-muted);" +
-            "font-size:10px;" +
-            "letter-spacing:2px;" +
-            "margin:16px 0;";
+            "text-align:center;color:var(--text-muted);font-size:10px;letter-spacing:2px;margin:16px 0;";
 
         box.appendChild(divider);
 
-        const input =
-            el("input");
+        const input = el("input");
 
         input.type = "text";
-
-        input.placeholder =
-            "Skriv rumskod";
-
+        input.placeholder = "Skriv rumskod";
         input.maxLength = 6;
-
         input.autocomplete = "off";
 
         input.style.cssText =
-            "display:block;" +
-            "width:100%;" +
-            "height:46px;" +
-            "padding:0 14px;" +
-            "text-align:center;" +
-            "text-transform:uppercase;" +
-            "background:#12100e;" +
-            "border:1px solid var(--border);" +
-            "border-radius:4px;" +
-            "color:var(--text-primary);" +
-            "font-size:18px;" +
-            "letter-spacing:4px;" +
-            "margin-bottom:10px;";
+            "display:block;width:100%;height:46px;padding:0 14px;text-align:center;text-transform:uppercase;background:#12100e;border:1px solid var(--border);border-radius:4px;color:var(--text-primary);font-size:18px;letter-spacing:4px;margin-bottom:10px;";
 
         box.appendChild(input);
 
@@ -2166,19 +1616,9 @@ function startScreen() {
 
                     if (code.length !== 6) {
 
-                        alert(
+                        showBanner(
+                            "FELAKTIG RUMSKOD",
                             "Rumskoden ska vara 6 tecken."
-                        );
-
-                        return;
-                    }
-
-                    if (
-                        hasExitedRoom(code)
-                    ) {
-
-                        alert(
-                            "Du har lämnat detta rum och kan inte ansluta till det igen från denna session."
                         );
 
                         return;
@@ -2186,7 +1626,8 @@ function startScreen() {
 
                     if (!connected) {
 
-                        alert(
+                        showBanner(
+                            "EJ ANSLUTEN",
                             "Servern är inte ansluten."
                         );
 
@@ -2203,21 +1644,17 @@ function startScreen() {
         box.appendChild(joinBtn);
 
         screen.appendChild(box);
-
         app.appendChild(screen);
 
         return;
     }
 
-    // ========================================================
-    // AKTIVT RUM
-    // ========================================================
+    /* ========================================================
+       AKTIVT RUM / VÄNTAN PÅ SPEL
+       ======================================================== */
 
     const roomBox =
-        el(
-            "div",
-            "name-frame"
-        );
+        el("div","name-frame");
 
     const roomTitle =
         el(
@@ -2227,11 +1664,7 @@ function startScreen() {
         );
 
     roomTitle.style.cssText =
-        "text-align:center;" +
-        "color:var(--text-secondary);" +
-        "font-size:10px;" +
-        "letter-spacing:2px;" +
-        "margin-bottom:4px;";
+        "text-align:center;color:var(--text-secondary);font-size:10px;letter-spacing:2px;margin-bottom:4px;";
 
     roomBox.appendChild(roomTitle);
 
@@ -2243,12 +1676,7 @@ function startScreen() {
         );
 
     roomNumber.style.cssText =
-        "text-align:center;" +
-        "color:var(--gold);" +
-        "font-size:28px;" +
-        "font-weight:700;" +
-        "letter-spacing:6px;" +
-        "margin-bottom:14px;";
+        "text-align:center;color:var(--gold);font-size:28px;font-weight:700;letter-spacing:6px;margin-bottom:14px;";
 
     roomBox.appendChild(roomNumber);
 
@@ -2262,10 +1690,7 @@ function startScreen() {
             );
 
         info.style.cssText =
-            "text-align:center;" +
-            "color:var(--gold);" +
-            "font-size:10px;" +
-            "margin-bottom:14px;";
+            "text-align:center;color:var(--gold);font-size:10px;margin-bottom:14px;";
 
         roomBox.appendChild(info);
 
@@ -2278,10 +1703,7 @@ function startScreen() {
         ) {
 
             const row =
-                el(
-                    "div",
-                    "name-row"
-                );
+                el("div","name-row");
 
             row.appendChild(
                 el(
@@ -2295,9 +1717,13 @@ function startScreen() {
                 el("input");
 
             input.type = "text";
+            input.autocomplete = "off";
 
-            input.autocomplete =
-                "off";
+            /*
+             * VIKTIGT:
+             * Dessa fält ligger bara lokalt på hostens sida.
+             * En annan spelare som ansluter ändrar inte dessa fält.
+             */
 
             row.appendChild(input);
 
@@ -2307,22 +1733,17 @@ function startScreen() {
         }
 
         roomBox.appendChild(
-            button(
-                "STARTA SPEL",
-                "",
-                () => {
+    button("STARTA SPEL", "start-game-btn", () => {
 
                     const names =
                         nameEntries
-                            .map(
-                                i =>
-                                    i.value.trim()
-                            )
+                            .map(i => i.value.trim())
                             .filter(Boolean);
 
                     if (!names.length) {
 
-                        alert(
+                        showBanner(
+                            "INGA SPELARE",
                             "Skriv in minst en spelare."
                         );
 
@@ -2332,14 +1753,13 @@ function startScreen() {
                     if (
                         new Set(
                             names.map(
-                                n =>
-                                    n.toLowerCase()
+                                n => n.toLowerCase()
                             )
-                        ).size !==
-                        names.length
+                        ).size !== names.length
                     ) {
 
-                        alert(
+                        showBanner(
+                            "DUBBLA NAMN",
                             "Varje spelare måste ha ett unikt namn."
                         );
 
@@ -2361,10 +1781,7 @@ function startScreen() {
             );
 
         waiting.style.cssText =
-            "text-align:center;" +
-            "color:var(--text-secondary);" +
-            "font-size:11px;" +
-            "margin-bottom:8px;";
+            "text-align:center;color:var(--text-secondary);font-size:11px;margin-bottom:8px;";
 
         roomBox.appendChild(waiting);
 
@@ -2376,35 +1793,50 @@ function startScreen() {
             );
 
         message.style.cssText =
-            "text-align:center;" +
-            "color:var(--text-muted);" +
-            "font-size:12px;" +
-            "line-height:1.5;";
+            "text-align:center;color:var(--text-muted);font-size:12px;line-height:1.5;";
 
         roomBox.appendChild(message);
     }
 
-    // ========================================================
-    // RESET SESSION
-    // ========================================================
+    /* ========================================================
+       AVBRYT SESSION
+       ======================================================== */
 
-    const resetBtn =
+    const leaveBtn =
         button(
-            "AVSLUTA SESSION",
+            "AVBRYT SESSION",
             "",
-            resetSession
+            () => {
+
+                if (
+                    !confirm(
+                        "Avbryta sessionen på den här enheten?"
+                    )
+                ) {
+                    return;
+                }
+
+                /*
+                 * Viktigt:
+                 * Vi raderar INTE spelet på servern.
+                 * Vi lämnar bara den här klientens session.
+                 */
+
+                socket.emit(
+                    "leave_session"
+                );
+            }
         );
 
     screen.appendChild(roomBox);
-
-    screen.appendChild(resetBtn);
+    screen.appendChild(leaveBtn);
 
     app.appendChild(screen);
 }
 
-// ============================================================
-// SPEL
-// ============================================================
+/* ============================================================
+   NÄSTA OMGÅNG
+   ============================================================ */
 
 function nextRound() {
 
@@ -2413,21 +1845,16 @@ function nextRound() {
     activePlayerIndex++;
 
     if (
-        activePlayerIndex >=
-        players.length
+        activePlayerIndex >= players.length
     ) {
-
         activePlayerIndex = 0;
     }
 
     currentRound++;
 
-    for (
-        const player of players
-    ) {
+    for (const player of players) {
 
         if (!scores[player]) {
-
             scores[player] = [];
         }
 
@@ -2440,76 +1867,65 @@ function nextRound() {
     sendState();
 }
 
-// ============================================================
-// GAME SCREEN
-// ============================================================
+/* ============================================================
+   SPELSKÄRM
+   ============================================================ */
 
 function gameScreen() {
 
     currentScreen = "game";
 
-    app.innerHTML = '';
+    app.innerHTML = "";
+
+    removeCornerTools();
+    createCornerTools();
 
     const screen =
-        el(
-            'div',
-            'screen game-screen'
-        );
+        el("div","screen game-screen");
 
     screen.appendChild(
         el(
-            'div',
-            'game-title',
-            'CHICAGO'
+            "div",
+            "game-title",
+            "CHICAGO"
         )
     );
 
     screen.appendChild(
         el(
-            'div',
-            'round-label',
+            "div",
+            "round-label",
             `OMGÅNG ${currentRound + 1}`
         )
     );
 
-    const hostLabel =
+    screen.appendChild(
         el(
-            'div',
-            'host-label',
+            "div",
+            "host-label",
             isHost()
-                ? '● DU ÄR PROTOKOLLFÖRARE'
-                : '● FÖLJER PROTOKOLLET'
-        );
-
-    screen.appendChild(hostLabel);
+                ? "● DU ÄR PROTOKOLLFÖRARE"
+                : "● FÖLJER PROTOKOLLET"
+        )
+    );
 
     const wrapper =
-        el(
-            'div',
-            'table-wrapper'
-        );
+        el("div","table-wrapper");
 
     const table =
-        el(
-            'table',
-            'score-table'
-        );
-
-    // ========================================================
-    // THEAD
-    // ========================================================
+        el("table","score-table");
 
     const thead =
-        el('thead');
+        el("thead");
 
     const header =
-        el('tr');
+        el("tr");
 
     header.appendChild(
         el(
-            'th',
-            'player-header',
-            'Omgång'
+            "th",
+            "player-header",
+            "Omgång"
         )
     );
 
@@ -2518,18 +1934,16 @@ function gameScreen() {
 
             const th =
                 el(
-                    'th',
-                    'round-header',
+                    "th",
+                    "round-header",
                     player
                 );
 
             if (
-                idx ===
-                activePlayerIndex
+                idx === activePlayerIndex
             ) {
-
                 th.style.background =
-                    'rgba(192,57,43,0.15)';
+                    "rgba(192,57,43,.15)";
             }
 
             if (
@@ -2537,9 +1951,8 @@ function gameScreen() {
                 player === previousWinner &&
                 idx !== activePlayerIndex
             ) {
-
                 th.style.border =
-                    '2px solid var(--gold)';
+                    "2px solid var(--gold)";
             }
 
             header.appendChild(th);
@@ -2549,12 +1962,12 @@ function gameScreen() {
     thead.appendChild(header);
 
     const sub =
-        el('tr');
+        el("tr");
 
     sub.appendChild(
         el(
-            'th',
-            'player-header',
+            "th",
+            "player-header",
             '<span class="sub-header">S1 / S2</span>'
         )
     );
@@ -2563,37 +1976,32 @@ function gameScreen() {
 
         sub.appendChild(
             el(
-                'th',
-                'round-header',
+                "th",
+                "round-header",
                 '<span class="sub-header">S1 / S2</span>'
             )
         );
     });
 
     thead.appendChild(sub);
-
     table.appendChild(thead);
 
-    // ========================================================
-    // TBODY
-    // ========================================================
-
     const tbody =
-        el('tbody');
+        el("tbody");
 
     const ri =
         currentRound;
 
     const row =
         el(
-            'tr',
-            'current-round-row'
+            "tr",
+            "current-round-row"
         );
 
     row.appendChild(
         el(
-            'td',
-            'player-header',
+            "td",
+            "player-header",
             `Omg ${ri + 1}`
         )
     );
@@ -2602,8 +2010,7 @@ function gameScreen() {
         (player, pi) => {
 
             const data =
-                scores[player]?.[ri] ||
-                {};
+                scores[player]?.[ri] || {};
 
             const s1 =
                 data.s1?.total ?? 0;
@@ -2613,29 +2020,27 @@ function gameScreen() {
 
             const cell =
                 el(
-                    'td',
-                    'score-cell'
+                    "td",
+                    "score-cell"
                 );
 
             if (
-                pi ===
-                activePlayerIndex
+                pi === activePlayerIndex
             ) {
-
                 cell.style.background =
-                    'rgba(192,57,43,0.08)';
+                    "rgba(192,57,43,.08)";
             }
 
             const frame =
                 el(
-                    'div',
-                    'score-frame'
+                    "div",
+                    "score-frame"
                 );
 
             const b1 =
                 el(
-                    'button',
-                    'score-btn',
+                    "button",
+                    "score-btn",
                     s1
                 );
 
@@ -2651,15 +2056,15 @@ function gameScreen() {
 
             const slash =
                 el(
-                    'span',
-                    'score-slash',
-                    '/'
+                    "span",
+                    "score-slash",
+                    "/"
                 );
 
             const b2 =
                 el(
-                    'button',
-                    'score-btn',
+                    "button",
+                    "score-btn",
                     s2
                 );
 
@@ -2674,34 +2079,27 @@ function gameScreen() {
             };
 
             frame.appendChild(b1);
-
             frame.appendChild(slash);
-
             frame.appendChild(b2);
 
             cell.appendChild(frame);
-
             row.appendChild(cell);
         }
     );
 
     tbody.appendChild(row);
 
-    // ========================================================
-    // TOTAL
-    // ========================================================
-
     const totalRow =
         el(
-            'tr',
-            'total-row'
+            "tr",
+            "total-row"
         );
 
     totalRow.appendChild(
         el(
-            'td',
-            'total-label',
-            'TOTAL'
+            "td",
+            "total-label",
+            "TOTAL"
         )
     );
 
@@ -2710,8 +2108,8 @@ function gameScreen() {
 
             totalRow.appendChild(
                 el(
-                    'td',
-                    'round-total-cell',
+                    "td",
+                    "round-total-cell",
                     calculateTotal(player)
                 )
             );
@@ -2721,65 +2119,47 @@ function gameScreen() {
     tbody.appendChild(totalRow);
 
     table.appendChild(tbody);
-
     wrapper.appendChild(table);
-
     screen.appendChild(wrapper);
 
-    // ========================================================
-    // BOTTOM
-    // ========================================================
-
     const bottom =
-        el(
-            'div',
-            'bottom-frame'
-        );
+        el("div","bottom-frame");
 
     if (isHost()) {
 
         bottom.appendChild(
             button(
-                'NY OMGÅNG',
-                '',
+                "NY OMGÅNG",
+                "",
                 nextRound
             )
         );
 
         bottom.appendChild(
             button(
-                'STATISTIK',
-                '',
+                "STATISTIK",
+                "",
                 showStatistics
             )
         );
 
         bottom.appendChild(
             button(
-                'NYTT SPEL',
-                '',
+                "NYTT SPEL",
+                "",
                 newGameFromGame
             )
         );
     }
-
-    // Alla kan avsluta sin egen session.
-    bottom.appendChild(
-        button(
-            'AVSLUTA SESSION',
-            '',
-            resetSession
-        )
-    );
 
     screen.appendChild(bottom);
 
     app.appendChild(screen);
 }
 
-// ============================================================
-// NYTT SPEL
-// ============================================================
+/* ============================================================
+   NYTT SPEL
+   ============================================================ */
 
 function newGameFromGame() {
 
@@ -2787,18 +2167,18 @@ function newGameFromGame() {
 
     if (
         !confirm(
-            "Starta ett nytt spel?\n\n" +
-            "Spelarnas namn behålls.\n" +
-            "All statistik sparas."
+            "Starta ett nytt spel?\n\nSpelarnas namn behålls.\nAll statistik sparas."
         )
-    ) return;
+    ) {
+        return;
+    }
 
     startNewGameWithSamePlayers();
 }
 
-// ============================================================
-// POÄNGPOPUP
-// ============================================================
+/* ============================================================
+   POÄNGPOPUP
+   ============================================================ */
 
 function openScorePopup(
     player,
@@ -2821,40 +2201,34 @@ function openScorePopup(
     let selectedOutplay =
         roundData[key]?.outplay || 0;
 
-    let selectedCombination =
-        null;
+    let selectedCombination = null;
 
     const overlay =
         el(
-            'div',
-            'popup-overlay'
+            "div",
+            "popup-overlay"
         );
 
     const popup =
         el(
-            'div',
-            'popup'
+            "div",
+            "popup"
         );
 
     overlay.appendChild(popup);
 
-    const title =
+    popup.appendChild(
         el(
-            'div',
-            'popup-title',
-            `${player} — ${
-                gameNumber === 0
-                    ? "S1"
-                    : "S2"
-            }`
-        );
-
-    popup.appendChild(title);
+            "div",
+            "popup-title",
+            `${player} — ${gameNumber === 0 ? "S1" : "S2"}`
+        )
+    );
 
     const grid =
         el(
-            'div',
-            'combination-grid'
+            "div",
+            "combination-grid"
         );
 
     const buttons = [];
@@ -2864,28 +2238,26 @@ function openScorePopup(
         buttons.forEach(item => {
 
             item.button.classList.toggle(
-                'selected',
+                "selected",
                 item.value === selectedBase
             );
         });
     }
 
     COMBINATIONS.forEach(
-        ([name, value, keyName]) => {
+        ([name,value,keyName]) => {
 
             const btn =
                 el(
-                    'button',
-                    'combination-btn',
+                    "button",
+                    "combination-btn",
                     name
                 );
 
             btn.onclick = () => {
 
                 selectedBase = value;
-
-                selectedCombination =
-                    keyName;
+                selectedCombination = keyName;
 
                 updateSelection();
 
@@ -2899,17 +2271,13 @@ function openScorePopup(
                         selectedCombination
                     );
 
-                    document.body
-                        .removeChild(
-                            overlay
-                        );
+                    overlay.remove();
 
                     if (
                         name.startsWith(
                             "Royal Flush"
                         )
                     ) {
-
                         finishGame(
                             player,
                             "ROYAL FLUSH! 🎉"
@@ -2929,32 +2297,26 @@ function openScorePopup(
 
     popup.appendChild(grid);
 
-    // ========================================================
-    // UT SPEL
-    // ========================================================
-
     if (gameNumber === 1) {
 
         const section =
             el(
-                'div',
-                'outplay-section'
+                "div",
+                "outplay-section"
             );
 
         const outplayBtn =
             el(
-                'button',
-                'outplay-btn',
-                '+5 UTSPEL'
+                "button",
+                "outplay-btn",
+                "+5 UTSPEL"
             );
 
         if (
-            selectedOutplay ===
-            OUTPLAY_POINTS
+            selectedOutplay === OUTPLAY_POINTS
         ) {
-
             outplayBtn.classList.add(
-                'selected'
+                "selected"
             );
         }
 
@@ -2967,28 +2329,25 @@ function openScorePopup(
                     : OUTPLAY_POINTS;
 
             outplayBtn.classList.toggle(
-                'selected',
+                "selected",
                 selectedOutplay > 0
             );
         };
 
-        section.appendChild(
-            outplayBtn
-        );
-
+        section.appendChild(outplayBtn);
         popup.appendChild(section);
 
         const actions =
             el(
-                'div',
-                'popup-buttons'
+                "div",
+                "popup-buttons"
             );
 
         const saveBtn =
             el(
-                'button',
-                'popup-btn popup-btn-save',
-                'KLAR'
+                "button",
+                "popup-btn popup-btn-save",
+                "KLAR"
             );
 
         saveBtn.onclick = () => {
@@ -3001,10 +2360,7 @@ function openScorePopup(
                 selectedCombination
             );
 
-            document.body
-                .removeChild(
-                    overlay
-                );
+            overlay.remove();
 
             const total =
                 calculateTotal(player);
@@ -3013,7 +2369,6 @@ function openScorePopup(
                 total > 50 &&
                 selectedOutplay > 0
             ) {
-
                 finishGame(
                     player,
                     "ÖVER 50 POÄNG + UTSPEL! 🎉"
@@ -3025,18 +2380,13 @@ function openScorePopup(
 
         const cancelBtn =
             el(
-                'button',
-                'popup-btn popup-btn-cancel',
-                'AVBRYT'
+                "button",
+                "popup-btn popup-btn-cancel",
+                "AVBRYT"
             );
 
-        cancelBtn.onclick = () => {
-
-            document.body
-                .removeChild(
-                    overlay
-                );
-        };
+        cancelBtn.onclick = () =>
+            overlay.remove();
 
         actions.appendChild(cancelBtn);
 
@@ -3050,9 +2400,9 @@ function openScorePopup(
     );
 }
 
-// ============================================================
-// SPARA POÄNG
-// ============================================================
+/* ============================================================
+   SPARA POÄNG
+   ============================================================ */
 
 function saveScore(
     player,
@@ -3072,12 +2422,8 @@ function saveScore(
         Number(outplay);
 
     scores[player][currentRound][key] = {
-
         base: Number(base),
-
-        outplay:
-            Number(outplay),
-
+        outplay: Number(outplay),
         total
     };
 
@@ -3085,50 +2431,36 @@ function saveScore(
 
     if (
         combinationKey &&
-        (!old ||
-            old.base !== base)
+        (!old || old.base !== base)
     ) {
 
         if (
-            statistics[player][
-                combinationKey
-            ] !== undefined
+            statistics[player][combinationKey] !==
+            undefined
         ) {
-
-            statistics[player][
-                combinationKey
-            ]++;
+            statistics[player][combinationKey]++;
         }
     }
 
     if (
         base === 15 &&
-        (!old ||
-            old.base !== base)
+        (!old || old.base !== base)
     ) {
-
-        statistics[player]
-            .chicago_plus++;
+        statistics[player].chicago_plus++;
     }
 
     if (
         base === -15 &&
-        (!old ||
-            old.base !== base)
+        (!old || old.base !== base)
     ) {
-
-        statistics[player]
-            .chicago_minus++;
+        statistics[player].chicago_minus++;
     }
 
     if (
         outplay > 0 &&
-        (!old ||
-            old.outplay === 0)
+        (!old || old.outplay === 0)
     ) {
-
-        statistics[player]
-            .outplay++;
+        statistics[player].outplay++;
     }
 
     sendState();
@@ -3136,14 +2468,13 @@ function saveScore(
     if (
         currentScreen === "stats"
     ) {
-
         showStatistics();
     }
 }
 
-// ============================================================
-// FINISH GAME
-// ============================================================
+/* ============================================================
+   AVSLUTA SPEL
+   ============================================================ */
 
 function finishGame(
     winner,
@@ -3153,7 +2484,9 @@ function finishGame(
     if (
         !isHost() ||
         gameFinished
-    ) return;
+    ) {
+        return;
+    }
 
     gameFinished = true;
 
@@ -3161,8 +2494,7 @@ function finishGame(
 
     statistics[winner].wins++;
 
-    previousWinner =
-        winner;
+    previousWinner = winner;
 
     for (
         const player of players
@@ -3173,31 +2505,26 @@ function finishGame(
         const total =
             calculateTotal(player);
 
-        statistics[player]
-            .totalPoints += total;
+        statistics[player].totalPoints +=
+            total;
 
-        statistics[player]
-            .rounds +=
-                currentRound + 1;
+        statistics[player].rounds +=
+            currentRound + 1;
 
         if (
             total >
-            statistics[player]
-                .highestScore
+            statistics[player].highestScore
         ) {
-
-            statistics[player]
-                .highestScore = total;
+            statistics[player].highestScore =
+                total;
         }
 
         if (
             total >
-            statistics[player]
-                .highestRound
+            statistics[player].highestRound
         ) {
-
-            statistics[player]
-                .highestRound = total;
+            statistics[player].highestRound =
+                total;
         }
     }
 
@@ -3209,80 +2536,79 @@ function finishGame(
     );
 }
 
-// ============================================================
-// VINSTSKÄRM
-// ============================================================
+/* ============================================================
+   VINNARE
+   ============================================================ */
 
 function showWinner(
     player,
     reason
 ) {
 
-    currentScreen =
-        "winner";
+    currentScreen = "winner";
 
-    app.innerHTML = '';
+    app.innerHTML = "";
+
+    removeCornerTools();
+    createCornerTools();
 
     const screen =
         el(
-            'div',
-            'screen winner-screen'
+            "div",
+            "screen winner-screen"
         );
 
     screen.appendChild(
         el(
-            'div',
-            'winner-title',
-            '🏆 VINST! 🏆'
+            "div",
+            "winner-title",
+            "🏆 VINST! 🏆"
         )
     );
 
     screen.appendChild(
         el(
-            'div',
-            'winner-name',
+            "div",
+            "winner-name",
             player
         )
     );
 
     screen.appendChild(
         el(
-            'div',
-            'winner-score',
+            "div",
+            "winner-score",
             `${calculateTotal(player)} POÄNG`
         )
     );
 
     screen.appendChild(
         el(
-            'div',
-            'winner-message',
+            "div",
+            "winner-message",
             reason
         )
     );
 
     const buttons =
         el(
-            'div',
-            'winner-buttons'
+            "div",
+            "winner-buttons"
         );
 
     if (isHost()) {
 
         buttons.appendChild(
             button(
-                'NYTT SPEL',
-                '',
+                "NYTT SPEL",
+                "",
                 () => {
 
                     if (
                         confirm(
-                            "Starta ett nytt spel?\n\n" +
-                            "Spelarnas namn behålls.\n" +
-                            "All statistik sparas."
+                            "Starta ett nytt spel?\n\nSpelarnas namn behålls.\nAll statistik sparas."
                         )
                     ) {
-
                         startNewGameWithSamePlayers();
                     }
                 }
@@ -3291,31 +2617,22 @@ function showWinner(
 
         buttons.appendChild(
             button(
-                'STATISTIK',
-                '',
+                "STATISTIK",
+                "",
                 showStatistics
             )
         );
     }
 
-    buttons.appendChild(
-        button(
-            'AVSLUTA SESSION',
-            '',
-            resetSession
-        )
-    );
-
     screen.appendChild(buttons);
-
     app.appendChild(screen);
 
     createConfetti();
 }
 
-// ============================================================
-// CONFETTI
-// ============================================================
+/* ============================================================
+   CONFETTI
+   ============================================================ */
 
 function createConfetti() {
 
@@ -3335,8 +2652,8 @@ function createConfetti() {
 
         const piece =
             el(
-                'div',
-                'confetti'
+                "div",
+                "confetti"
             );
 
         piece.style.left =
@@ -3352,15 +2669,12 @@ function createConfetti() {
             ];
 
         piece.style.animationDuration =
-            (
-                2 +
-                Math.random() * 2.5
-            ) + "s";
+            (2 + Math.random() * 2.5) +
+            "s";
 
         piece.style.animationDelay =
-            (
-                Math.random() * 0.8
-            ) + "s";
+            (Math.random() * .8) +
+            "s";
 
         document.body.appendChild(
             piece
@@ -3373,9 +2687,9 @@ function createConfetti() {
     }
 }
 
-// ============================================================
-// LIVE STATISTIK
-// ============================================================
+/* ============================================================
+   LIVE STATISTIK
+   ============================================================ */
 
 function getLiveStats(player) {
 
@@ -3399,8 +2713,7 @@ function getLiveStats(player) {
 
     const liveTotal =
         gameStarted
-            ? historicalPoints +
-              currentPoints
+            ? historicalPoints + currentPoints
             : historicalPoints;
 
     const liveAverage =
@@ -3411,92 +2724,25 @@ function getLiveStats(player) {
             : 0;
 
     return {
-
         games,
-
-        wins:
-            Number(
-                saved.wins || 0
-            ),
-
-        totalPoints:
-            liveTotal,
-
-        average:
-            liveAverage,
-
+        wins: Number(saved.wins || 0),
+        totalPoints: liveTotal,
+        average: liveAverage,
         currentPoints,
-
-        rounds:
-            Number(
-                saved.rounds || 0
-            ),
-
-        zero:
-            Number(
-                saved.zero || 0
-            ),
-
-        par:
-            Number(
-                saved.par || 0
-            ),
-
-        tvapar:
-            Number(
-                saved.tvapar || 0
-            ),
-
-        triss:
-            Number(
-                saved.triss || 0
-            ),
-
-        stege:
-            Number(
-                saved.stege || 0
-            ),
-
-        farg:
-            Number(
-                saved.farg || 0
-            ),
-
-        kak:
-            Number(
-                saved.kak || 0
-            ),
-
-        fyrtal:
-            Number(
-                saved.fyrtal || 0
-            ),
-
-        fargstege:
-            Number(
-                saved.fargstege || 0
-            ),
-
-        royal:
-            Number(
-                saved.royal || 0
-            ),
-
-        chicago_plus:
-            Number(
-                saved.chicago_plus || 0
-            ),
-
-        chicago_minus:
-            Number(
-                saved.chicago_minus || 0
-            ),
-
-        outplay:
-            Number(
-                saved.outplay || 0
-            ),
-
+        rounds: Number(saved.rounds || 0),
+        zero: Number(saved.zero || 0),
+        par: Number(saved.par || 0),
+        tvapar: Number(saved.tvapar || 0),
+        triss: Number(saved.triss || 0),
+        stege: Number(saved.stege || 0),
+        farg: Number(saved.farg || 0),
+        kak: Number(saved.kak || 0),
+        fyrtal: Number(saved.fyrtal || 0),
+        fargstege: Number(saved.fargstege || 0),
+        royal: Number(saved.royal || 0),
+        chicago_plus: Number(saved.chicago_plus || 0),
+        chicago_minus: Number(saved.chicago_minus || 0),
+        outplay: Number(saved.outplay || 0),
         highestScore:
             Number(
                 saved.highestScore || 0
@@ -3504,52 +2750,53 @@ function getLiveStats(player) {
     };
 }
 
-// ============================================================
-// STATISTIK
-// ============================================================
+/* ============================================================
+   STATISTIK
+   ============================================================ */
 
 function showStatistics() {
 
-    currentScreen =
-        "stats";
+    currentScreen = "stats";
 
-    app.innerHTML = '';
+    app.innerHTML = "";
+
+    removeCornerTools();
+    createCornerTools();
 
     const screen =
         el(
-            'div',
-            'screen stats-screen'
+            "div",
+            "screen stats-screen"
         );
 
     screen.appendChild(
         el(
-            'div',
-            'stats-title',
-            'STATISTIK'
+            "div",
+            "stats-title",
+            "STATISTIK"
         )
     );
 
     const subtitle =
         el(
-            'div',
-            'stats-subtitle',
+            "div",
+            "stats-subtitle",
             gameStarted
-                ? '● LIVE — PÅGÅENDE SPEL'
-                : 'ALLA TIDIGARE SPEL'
+                ? "● LIVE — PÅGÅENDE SPEL"
+                : "ALLA TIDIGARE SPEL"
         );
 
     if (gameStarted) {
-
         subtitle.style.color =
-            'var(--gold)';
+            "var(--gold)";
     }
 
     screen.appendChild(subtitle);
 
     const list =
         el(
-            'div',
-            'stats-list'
+            "div",
+            "stats-list"
         );
 
     const names =
@@ -3559,41 +2806,30 @@ function showStatistics() {
 
         list.appendChild(
             el(
-                'div',
-                '',
-                'Ingen statistik ännu.'
+                "div",
+                "",
+                "Ingen statistik ännu."
             )
         );
 
     } else {
 
         names.sort(
-            (a, b) => {
+            (a,b) => {
 
                 const aw =
-                    statistics[a]?.wins ||
-                    0;
+                    statistics[a]?.wins || 0;
 
                 const bw =
-                    statistics[b]?.wins ||
-                    0;
+                    statistics[b]?.wins || 0;
 
                 if (aw !== bw) {
-
                     return bw - aw;
                 }
 
                 return (
-                    (
-                        statistics[b]
-                            ?.totalPoints ||
-                        0
-                    ) -
-                    (
-                        statistics[a]
-                            ?.totalPoints ||
-                        0
-                    )
+                    (statistics[b]?.totalPoints || 0) -
+                    (statistics[a]?.totalPoints || 0)
                 );
             }
         );
@@ -3607,134 +2843,54 @@ function showStatistics() {
 
             const card =
                 el(
-                    'div',
-                    'stats-card'
+                    "div",
+                    "stats-card"
                 );
 
             card.appendChild(
                 el(
-                    'div',
-                    'stats-player',
+                    "div",
+                    "stats-player",
                     player
                 )
             );
 
             const grid =
                 el(
-                    'div',
-                    'stats-grid'
+                    "div",
+                    "stats-grid"
                 );
 
             const stats = [
-
-                [
-                    data.games,
-                    "Spel"
-                ],
-
-                [
-                    data.wins,
-                    "Vinster"
-                ],
-
+                [data.games,"Spel"],
+                [data.wins,"Vinster"],
                 [
                     data.games
                         ? Math.round(
-                            (
-                                data.wins /
-                                data.games
-                            ) * 100
+                            data.wins /
+                            data.games *
+                            100
                         )
                         : 0,
                     "Vinst %"
                 ],
-
-                [
-                    data.totalPoints,
-                    "Totalpoäng",
-                    gameStarted
-                ],
-
-                [
-                    data.average,
-                    "Snittpoäng",
-                    gameStarted
-                ],
-
-                [
-                    data.highestScore,
-                    "Bästa resultat"
-                ],
-
-                [
-                    data.rounds,
-                    "Omgångar"
-                ],
-
-                [
-                    data.zero,
-                    "0 poäng"
-                ],
-
-                [
-                    data.par,
-                    "Par"
-                ],
-
-                [
-                    data.tvapar,
-                    "Två par"
-                ],
-
-                [
-                    data.triss,
-                    "Triss"
-                ],
-
-                [
-                    data.stege,
-                    "Stege"
-                ],
-
-                [
-                    data.farg,
-                    "Färg"
-                ],
-
-                [
-                    data.kak,
-                    "Kåk"
-                ],
-
-                [
-                    data.fyrtal,
-                    "Fyrtal"
-                ],
-
-                [
-                    data.fargstege,
-                    "Färgstege"
-                ],
-
-                [
-                    data.royal,
-                    "Royal Flush"
-                ],
-
-                [
-                    data.chicago_plus,
-                    "Chicago +15"
-                ],
-
-                [
-                    data.chicago_minus,
-                    "Chicago -15"
-                ],
-
-                [
-                    data.outplay,
-                    "Utspel"
-                ]
+                [data.totalPoints,"Totalpoäng",gameStarted],
+                [data.average,"Snittpoäng",gameStarted],
+                [data.highestScore,"Bästa resultat"],
+                [data.rounds,"Omgångar"],
+                [data.zero,"0 poäng"],
+                [data.par,"Par"],
+                [data.tvapar,"Två par"],
+                [data.triss,"Triss"],
+                [data.stege,"Stege"],
+                [data.farg,"Färg"],
+                [data.kak,"Kåk"],
+                [data.fyrtal,"Fyrtal"],
+                [data.fargstege,"Färgstege"],
+                [data.royal,"Royal Flush"],
+                [data.chicago_plus,"Chicago +15"],
+                [data.chicago_minus,"Chicago -15"],
+                [data.outplay,"Utspel"]
             ];
 
             if (gameStarted) {
@@ -3757,30 +2913,26 @@ function showStatistics() {
             }
 
             stats.forEach(
-                ([value, label, live]) => {
+                ([value,label,live]) => {
 
                     const box =
                         el(
-                            'div',
-                            `stat-box${
-                                live
-                                    ? ' live-stat'
-                                    : ''
-                            }`
+                            "div",
+                            `stat-box${live ? " live-stat" : ""}`
                         );
 
                     box.appendChild(
                         el(
-                            'div',
-                            'stat-number',
+                            "div",
+                            "stat-number",
                             value
                         )
                     );
 
                     box.appendChild(
                         el(
-                            'div',
-                            'stat-label',
+                            "div",
+                            "stat-label",
                             label
                         )
                     );
@@ -3790,7 +2942,6 @@ function showStatistics() {
             );
 
             card.appendChild(grid);
-
             list.appendChild(card);
         }
     }
@@ -3799,39 +2950,24 @@ function showStatistics() {
 
     const buttons =
         el(
-            'div',
-            'stats-buttons'
+            "div",
+            "stats-buttons"
         );
 
     buttons.appendChild(
         button(
             gameStarted
-                ? 'TILLBAKA TILL SPELET'
-                : 'TILL START',
-            '',
+                ? "TILLBAKA TILL SPELET"
+                : "TILL START",
+            "",
             () => {
 
                 if (gameStarted) {
-
                     gameScreen();
-
                 } else {
-
                     startScreen();
                 }
             }
-        )
-    );
-
-    // ========================================================
-    // RESET SESSION ÄVEN FRÅN STATISTIK
-    // ========================================================
-
-    buttons.appendChild(
-        button(
-            'AVSLUTA SESSION',
-            '',
-            resetSession
         )
     );
 
@@ -3840,9 +2976,9 @@ function showStatistics() {
     app.appendChild(screen);
 }
 
-// ============================================================
-// START
-// ============================================================
+/* ============================================================
+   START
+   ============================================================ */
 
 startScreen();
 
