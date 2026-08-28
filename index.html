@@ -81,12 +81,10 @@ button, input {
 .btn:hover {
     transform: translateY(-1px);
     box-shadow: 0 4px 20px var(--gold-glow);
-
 }
 
 .start-game-btn {
     margin-top: 12px;
-
 }
 
 .btn:active {
@@ -846,6 +844,28 @@ const app = document.getElementById("app");
 const bannerContainer = document.getElementById("banner-container");
 
 /* ============================================================
+   KLIENT-ID
+   ============================================================ */
+
+let clientId = localStorage.getItem("chicago_client_id");
+
+if (!clientId) {
+
+    clientId =
+        "client_" +
+        Date.now() +
+        "_" +
+        Math.random()
+            .toString(36)
+            .substring(2, 12);
+
+    localStorage.setItem(
+        "chicago_client_id",
+        clientId
+    );
+}
+
+/* ============================================================
    SPEL
    ============================================================ */
 
@@ -879,32 +899,120 @@ const COMBINATIONS = [
 ];
 
 /* ============================================================
+   RUM SOM DENNA KLIENT HAR RESETAT FRÅN
+   ============================================================ */
+
+function getExitedRooms() {
+
+    try {
+
+        const data =
+            JSON.parse(
+                localStorage.getItem(
+                    "chicago_exited_rooms"
+                ) || "[]"
+            );
+
+        return Array.isArray(data)
+            ? data
+            : [];
+
+    } catch (error) {
+
+        return [];
+    }
+}
+
+function saveExitedRoom(code) {
+
+    if (!code) return;
+
+    const rooms =
+        getExitedRooms();
+
+    const normalized =
+        String(code)
+            .trim()
+            .toUpperCase();
+
+    if (!rooms.includes(normalized)) {
+
+        rooms.push(normalized);
+
+        localStorage.setItem(
+            "chicago_exited_rooms",
+            JSON.stringify(rooms)
+        );
+    }
+}
+
+function hasExitedRoom(code) {
+
+    if (!code) return false;
+
+    const normalized =
+        String(code)
+            .trim()
+            .toUpperCase();
+
+    return getExitedRooms()
+        .includes(normalized);
+}
+
+/* ============================================================
    HJÄLP
    ============================================================ */
 
 function isHost() {
-    return !!(
-        socket.id &&
-        hostId &&
-        socket.id === hostId
-    );
+    return !!(socket.id && hostId && socket.id === hostId);
 }
 
 function el(tag, cls = "", html = "") {
     const e = document.createElement(tag);
-
     if (cls) e.className = cls;
     if (html !== "") e.innerHTML = html;
-
     return e;
 }
 
 function button(text, cls, onClick) {
     const b = el("button", `btn ${cls}`, text);
-
     if (onClick) b.onclick = onClick;
-
     return b;
+}
+
+/* ============================================================
+   RESET SESSION
+   ============================================================ */
+
+function resetSession() {
+
+    if (
+        !confirm(
+            "Avsluta din session?\n\n" +
+            "Du lämnar spelet och kommer tillbaka till startsidan.\n\n" +
+            "Det pågående spelet påverkas inte för de andra."
+        )
+    ) {
+        return;
+    }
+
+    if (roomCode) {
+
+        socket.emit(
+            "reset_session"
+        );
+
+        return;
+    }
+
+    roomCode = null;
+    hostId = null;
+
+    localStorage.removeItem(
+        "chicago_room"
+    );
+
+    startScreen();
 }
 
 /* ============================================================
@@ -976,7 +1084,7 @@ function showFAQ() {
             "Nej. Pågående spel och sparad statistik ligger kvar."
         ],
         [
-            "Vad gör AVBRYT SESSION?",
+            "Vad gör AVSLUTA SESSION?",
             "Den här enheten lämnar den aktuella sessionen och går tillbaka till startsidan."
         ]
     ];
@@ -1111,11 +1219,20 @@ socket.on("connect", () => {
 
     connected = true;
 
-    const savedRoom = localStorage.getItem("chicago_room");
+    socket.emit(
+        "identify_client",
+        clientId
+    );
 
-    if (savedRoom) {
+    const savedRoom =
+        localStorage.getItem(
+            "chicago_room"
+        );
 
-        roomCode = savedRoom.toUpperCase();
+    if (savedRoom && !hasExitedRoom(savedRoom)) {
+
+        roomCode =
+            savedRoom.toUpperCase();
 
         socket.emit(
             "join_room",
@@ -1123,6 +1240,12 @@ socket.on("connect", () => {
         );
 
     } else {
+
+        roomCode = null;
+
+        localStorage.removeItem(
+            "chicago_room"
+        );
 
         startScreen();
     }
@@ -1148,14 +1271,16 @@ socket.on("room_joined", data => {
 
     if (!data || !data.roomCode) return;
 
-    roomCode = data.roomCode;
+    roomCode =
+        data.roomCode.toUpperCase();
 
     localStorage.setItem(
         "chicago_room",
         roomCode
     );
 
-    hostId = data.hostId || null;
+    hostId =
+        data.hostId || null;
 
     socket.emit("get_state");
 });
@@ -1198,14 +1323,18 @@ socket.on("no_room", () => {
     startScreen();
 });
 
-socket.on("session_left", () => {
+socket.on("session_reset", data => {
+
+    const oldRoom =
+        data?.roomCode || roomCode;
+
+    if (oldRoom) {
+
+        saveExitedRoom(oldRoom);
+    }
 
     roomCode = null;
     hostId = null;
-
-    localStorage.removeItem(
-        "chicago_room"
-    );
 
     players = [];
     scores = {};
@@ -1213,15 +1342,33 @@ socket.on("session_left", () => {
     activePlayerIndex = 0;
     gameStarted = false;
     gameFinished = false;
-    statistics = {};
     previousWinner = null;
 
-    startScreen();
-
-    showBanner(
-        "SESSION AVBRUTEN",
-        "Du har lämnat spelet på den här enheten."
+    localStorage.removeItem(
+        "chicago_room"
     );
+
+    currentScreen = "start";
+
+    startScreen();
+});
+
+socket.on("host_disconnected", () => {
+
+    if (
+        currentScreen === "game" ||
+        currentScreen === "stats" ||
+        currentScreen === "winner"
+    ) {
+
+        setTimeout(() => {
+
+            alert(
+                "Protokollföraren har kopplats från."
+            );
+
+        }, 100);
+    }
 });
 
 socket.on("host_changed", data => {
@@ -1362,20 +1509,6 @@ function sendState() {
 }
 
 /* ============================================================
-   REGISTER PLAYER
-   ============================================================ */
-
-function registerCurrentPlayer(name) {
-
-    if (!name) return;
-
-    socket.emit(
-        "register_player",
-        name
-    );
-}
-
-/* ============================================================
    TOTAL
    ============================================================ */
 
@@ -1448,10 +1581,6 @@ function startGame(names) {
 
         statistics[player].games++;
     }
-
-    registerCurrentPlayer(
-        players[0]
-    );
 
     sendState();
 }
@@ -1545,22 +1674,17 @@ function startScreen() {
         const box =
             el("div","name-frame");
 
-        /*
-         * DETTA OMRÅDE ÄR MEDVETET LÄMNAT
-         * SOM I DIN NUVARANDE VERSION.
-         */
+        const title = el(
+            "div",
+            "",
+            "SKAPA ELLER GÅ MED I SPEL"
+        );
 
-const title = el(
-    "div",
-    "",
-    "SKAPA ELLER GÅ MED I SPEL"
-);
+        title.style.cssText =
+            "text-align:center;color:var(--text-secondary);font-size:11px;letter-spacing:1px;margin-bottom:12px;";
 
-title.style.cssText =
-    "text-align:center;color:var(--text-secondary);font-size:11px;letter-spacing:1px;margin-bottom:12px;";
+        box.appendChild(title);
 
-box.appendChild(title);
-       
         const createBtn =
             button(
                 "SKAPA NYTT SPEL",
@@ -1625,6 +1749,16 @@ box.appendChild(title);
                         showBanner(
                             "FELAKTIG RUMSKOD",
                             "Rumskoden ska vara 6 tecken."
+                        );
+
+                        return;
+                    }
+
+                    if (hasExitedRoom(code)) {
+
+                        showBanner(
+                            "KAN INTE ANSLUTA",
+                            "Du har lämnat detta rum och kan inte ansluta till det igen från denna enhet."
                         );
 
                         return;
@@ -1725,12 +1859,6 @@ box.appendChild(title);
             input.type = "text";
             input.autocomplete = "off";
 
-            /*
-             * VIKTIGT:
-             * Dessa fält ligger bara lokalt på hostens sida.
-             * En annan spelare som ansluter ändrar inte dessa fält.
-             */
-
             row.appendChild(input);
 
             roomBox.appendChild(row);
@@ -1739,42 +1867,41 @@ box.appendChild(title);
         }
 
         roomBox.appendChild(
-    button("STARTA SPEL", "start-game-btn", () => {
+            button("STARTA SPEL", "start-game-btn", () => {
 
-                    const names =
-                        nameEntries
-                            .map(i => i.value.trim())
-                            .filter(Boolean);
+                const names =
+                    nameEntries
+                        .map(i => i.value.trim())
+                        .filter(Boolean);
 
-                    if (!names.length) {
+                if (!names.length) {
 
-                        showBanner(
-                            "INGA SPELARE",
-                            "Skriv in minst en spelare."
-                        );
+                    showBanner(
+                        "INGA SPELARE",
+                        "Skriv in minst en spelare."
+                    );
 
-                        return;
-                    }
-
-                    if (
-                        new Set(
-                            names.map(
-                                n => n.toLowerCase()
-                            )
-                        ).size !== names.length
-                    ) {
-
-                        showBanner(
-                            "DUBBLA NAMN",
-                            "Varje spelare måste ha ett unikt namn."
-                        );
-
-                        return;
-                    }
-
-                    startGame(names);
+                    return;
                 }
-            )
+
+                if (
+                    new Set(
+                        names.map(
+                            n => n.toLowerCase()
+                        )
+                    ).size !== names.length
+                ) {
+
+                    showBanner(
+                        "DUBBLA NAMN",
+                        "Varje spelare måste ha ett unikt namn."
+                    );
+
+                    return;
+                }
+
+                startGame(names);
+            })
         );
 
     } else {
@@ -1805,37 +1932,18 @@ box.appendChild(title);
     }
 
     /* ========================================================
-       AVBRYT SESSION
+       AVSLUTA SESSION
        ======================================================== */
 
-    const leaveBtn =
+    const resetBtn =
         button(
-            "AVBRYT SESSION",
+            "AVSLUTA SESSION",
             "",
-            () => {
-
-                if (
-                    !confirm(
-                        "Avbryta sessionen på den här enheten?"
-                    )
-                ) {
-                    return;
-                }
-
-                /*
-                 * Viktigt:
-                 * Vi raderar INTE spelet på servern.
-                 * Vi lämnar bara den här klientens session.
-                 */
-
-                socket.emit(
-                    "leave_session"
-                );
-            }
+            resetSession
         );
 
     screen.appendChild(roomBox);
-    screen.appendChild(leaveBtn);
+    screen.appendChild(resetBtn);
 
     app.appendChild(screen);
 }
@@ -2157,6 +2265,18 @@ function gameScreen() {
             )
         );
     }
+
+    /* ========================================================
+       AVSLUTA SESSION - ALLA KAN AVSLUTA
+       ======================================================== */
+
+    bottom.appendChild(
+        button(
+            "AVSLUTA SESSION",
+            "",
+            resetSession
+        )
+    );
 
     screen.appendChild(bottom);
 
@@ -2630,6 +2750,18 @@ function showWinner(
         );
     }
 
+    /* ========================================================
+       AVSLUTA SESSION - ALLA KAN AVSLUTA
+       ======================================================== */
+
+    buttons.appendChild(
+        button(
+            "AVSLUTA SESSION",
+            "",
+            resetSession
+        )
+    );
+
     screen.appendChild(buttons);
     app.appendChild(screen);
 
@@ -2974,6 +3106,18 @@ function showStatistics() {
                     startScreen();
                 }
             }
+        )
+    );
+
+    /* ========================================================
+       AVSLUTA SESSION - ALLA KAN AVSLUTA
+       ======================================================== */
+
+    buttons.appendChild(
+        button(
+            "AVSLUTA SESSION",
+            "",
+            resetSession
         )
     );
 

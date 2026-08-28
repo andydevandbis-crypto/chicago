@@ -21,8 +21,6 @@ app.get('/', (req, res) => {
 
 // ============================================================
 // RUM
-// Varje rum har sin egen state.
-// Ett rum kan därför spela helt oberoende av andra rum.
 // ============================================================
 
 const rooms = new Map();
@@ -35,16 +33,12 @@ const DISCONNECT_GRACE_MS = 60 * 1000;
 
 function generateRoomCode() {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-
     let code;
 
     do {
         code = '';
-
         for (let i = 0; i < 6; i++) {
-            code += chars.charAt(
-                Math.floor(Math.random() * chars.length)
-            );
+            code += chars.charAt(Math.floor(Math.random() * chars.length));
         }
     } while (rooms.has(code));
 
@@ -54,22 +48,16 @@ function generateRoomCode() {
 function createRoom(code) {
     return {
         roomCode: code,
-
         players: [],
         playerSockets: {},
-
         scores: {},
         currentRound: 0,
         activePlayerIndex: 0,
-
         gameStarted: false,
         statistics: {},
         previousWinner: null,
-
         hostId: null,
-
         createdAt: Date.now(),
-
         hostDisconnectedAt: null,
         hostDisconnectTimer: null
     };
@@ -77,7 +65,6 @@ function createRoom(code) {
 
 function getRoom(code) {
     if (!code) return null;
-
     return rooms.get(String(code).toUpperCase()) || null;
 }
 
@@ -117,14 +104,12 @@ function removeSocketFromRoom(socket) {
     if (!socket.currentRoom) return;
 
     const room = getRoom(socket.currentRoom);
-
     if (!room) {
         socket.currentRoom = null;
         return;
     }
 
     delete room.playerSockets[socket.id];
-
     socket.leave(room.roomCode);
     socket.currentRoom = null;
 }
@@ -136,11 +121,8 @@ function findAvailablePlayerForHost(room, leavingSocketId) {
 
     for (const socketId of socketIds) {
         if (socketId === leavingSocketId) continue;
-
         const player = room.playerSockets[socketId];
-
         if (!player) continue;
-
         return {
             socketId,
             playerName: player.playerName
@@ -152,13 +134,9 @@ function findAvailablePlayerForHost(room, leavingSocketId) {
 
 function transferHost(room, leavingSocketId, reason = 'left') {
     if (!room) return;
-
     if (room.hostId !== leavingSocketId) return;
 
-    const newHost = findAvailablePlayerForHost(
-        room,
-        leavingSocketId
-    );
+    const newHost = findAvailablePlayerForHost(room, leavingSocketId);
 
     room.hostDisconnectedAt = null;
 
@@ -169,9 +147,7 @@ function transferHost(room, leavingSocketId, reason = 'left') {
 
     if (!newHost) {
         room.hostId = null;
-
         emitState(room);
-
         return;
     }
 
@@ -185,9 +161,7 @@ function transferHost(room, leavingSocketId, reason = 'left') {
 
     emitState(room);
 
-    console.log(
-        `👑 Ny protokollförare i ${room.roomCode}: ${newHost.playerName}`
-    );
+    console.log(`👑 Ny protokollförare i ${room.roomCode}: ${newHost.playerName}`);
 }
 
 function scheduleHostTransfer(room) {
@@ -208,20 +182,14 @@ function scheduleHostTransfer(room) {
             return;
         }
 
-        transferHost(
-            room,
-            room.hostId,
-            'disconnect'
-        );
+        transferHost(room, room.hostId, 'disconnect');
     }, DISCONNECT_GRACE_MS);
 }
 
 function cleanupEmptyRoom(room) {
     if (!room) return;
 
-    const connectedPlayers = Object.keys(
-        room.playerSockets
-    );
+    const connectedPlayers = Object.keys(room.playerSockets);
 
     if (connectedPlayers.length > 0) return;
 
@@ -244,13 +212,20 @@ io.on('connection', (socket) => {
     console.log(`🔵 Ny spelare ansluten: ${socket.id}`);
 
     // ========================================================
+    // IDENTIFIERA KLIENT
+    // ========================================================
+
+    socket.on('identify_client', (clientId) => {
+        socket.clientId = clientId;
+        console.log(`🆔 Klient identifierad: ${clientId}`);
+    });
+
+    // ========================================================
     // SKAPA RUM
     // ========================================================
 
     socket.on('create_room', () => {
 
-        // Om klienten redan befinner sig i ett rum
-        // lämnar vi det först.
         removeSocketFromRoom(socket);
 
         const code = generateRoomCode();
@@ -272,9 +247,7 @@ io.on('connection', (socket) => {
             hostId: socket.id
         });
 
-        console.log(
-            `🏠 Rum skapat: ${code} av ${socket.id}`
-        );
+        console.log(`🏠 Rum skapat: ${code} av ${socket.id}`);
     });
 
     // ========================================================
@@ -285,31 +258,20 @@ io.on('connection', (socket) => {
 
         if (!rawCode) return;
 
-        const code = String(rawCode)
-            .trim()
-            .toUpperCase();
+        const code = String(rawCode).trim().toUpperCase();
 
         if (code.length !== 6) {
-            socket.emit(
-                'room_error',
-                'Rumskoden ska vara 6 tecken.'
-            );
-
+            socket.emit('room_error', 'Rumskoden ska vara 6 tecken.');
             return;
         }
 
         const room = getRoom(code);
 
         if (!room) {
-            socket.emit(
-                'room_error',
-                'Rummet finns inte längre.'
-            );
-
+            socket.emit('room_error', 'Rummet finns inte längre.');
             return;
         }
 
-        // Lämna eventuellt gammalt rum först.
         removeSocketFromRoom(socket);
 
         socket.join(code);
@@ -319,12 +281,7 @@ io.on('connection', (socket) => {
             playerName: null
         };
 
-        // Om hosten tidigare tappade kontakten men kommer tillbaka
-        // återtar hosten sin roll om det är samma socket.
-        if (
-            room.hostId &&
-            room.hostId === socket.id
-        ) {
+        if (room.hostId && room.hostId === socket.id) {
             room.hostDisconnectedAt = null;
 
             if (room.hostDisconnectTimer) {
@@ -340,44 +297,11 @@ io.on('connection', (socket) => {
 
         emitStateToSocket(socket, room);
 
-        console.log(
-            `🏠 Spelare gick med i rum: ${code}`
-        );
-    });
-
-    // ========================================================
-    // REGISTRERA NAMN
-    //
-    // Detta används för att servern ska veta vilken fysisk
-    // socket som motsvarar vilken spelare.
-    // ========================================================
-
-    socket.on('register_player', (playerName) => {
-
-        if (!socket.currentRoom) return;
-
-        const room = getRoom(socket.currentRoom);
-
-        if (!room) return;
-
-        const name = String(playerName || '').trim();
-
-        if (!name) return;
-
-        if (!room.playerSockets[socket.id]) {
-            room.playerSockets[socket.id] = {};
-        }
-
-        room.playerSockets[socket.id].playerName = name;
-
-        console.log(
-            `👤 ${name} registrerad i ${room.roomCode}`
-        );
+        console.log(`🏠 Spelare gick med i rum: ${code}`);
     });
 
     // ========================================================
     // UPDATE STATE
-    // Endast protokollföraren får ändra spelet.
     // ========================================================
 
     socket.on('update_state', (data) => {
@@ -389,56 +313,17 @@ io.on('connection', (socket) => {
         if (!room) return;
 
         if (socket.id !== room.hostId) {
-            socket.emit(
-                'action_error',
-                'Endast protokollföraren kan göra detta.'
-            );
-
+            socket.emit('action_error', 'Endast protokollföraren kan göra detta.');
             return;
         }
 
-        room.players = Array.isArray(data.players)
-            ? data.players
-            : [];
-
-        room.scores =
-            data.scores && typeof data.scores === 'object'
-                ? data.scores
-                : {};
-
-        room.currentRound =
-            Number(data.currentRound || 0);
-
-        room.activePlayerIndex =
-            Number(data.activePlayerIndex || 0);
-
+        room.players = Array.isArray(data.players) ? data.players : [];
+        room.scores = data.scores && typeof data.scores === 'object' ? data.scores : {};
+        room.currentRound = Number(data.currentRound || 0);
+        room.activePlayerIndex = Number(data.activePlayerIndex || 0);
         room.gameStarted = !!data.started;
-
-        room.statistics =
-            data.statistics &&
-            typeof data.statistics === 'object'
-                ? data.statistics
-                : {};
-
-        room.previousWinner =
-            data.previousWinner || null;
-
-        // Försök koppla socket -> spelare.
-        // Vi gör INTE om hela spelarlistan när någon annan ansluter.
-        // Detta är viktigt för att namn och speldata inte ska nollställas.
-        const hostPlayerNames = room.players.map(
-            player => String(player).trim()
-        );
-
-        const hostRecord = room.playerSockets[socket.id];
-
-        if (
-            hostRecord &&
-            hostRecord.playerName &&
-            hostPlayerNames.includes(hostRecord.playerName)
-        ) {
-            // Hostens namn är redan känt.
-        }
+        room.statistics = data.statistics && typeof data.statistics === 'object' ? data.statistics : {};
+        room.previousWinner = data.previousWinner || null;
 
         emitState(room);
     });
@@ -460,33 +345,23 @@ io.on('connection', (socket) => {
     });
 
     // ========================================================
-    // LÄMNA SESSION
-    //
-    // Detta avslutar bara den här klientens session.
-    // Spelet i rummet ligger kvar.
+    // RESET SESSION
     // ========================================================
 
-    socket.on('leave_session', () => {
+    socket.on('reset_session', () => {
 
         const room = getRoom(socket.currentRoom);
 
         if (!room) {
-            socket.emit('session_left');
+            socket.emit('no_room');
             return;
         }
 
-        const wasHost =
-            socket.id === room.hostId;
+        const wasHost = socket.id === room.hostId;
+        const playerRecord = room.playerSockets[socket.id];
+        const playerName = playerRecord?.playerName || null;
 
-        const playerRecord =
-            room.playerSockets[socket.id];
-
-        const playerName =
-            playerRecord?.playerName || null;
-
-        console.log(
-            `🚪 ${socket.id} lämnar sessionen i ${room.roomCode}`
-        );
+        console.log(`🚪 ${socket.id} resetar sessionen i ${room.roomCode}`);
 
         delete room.playerSockets[socket.id];
 
@@ -494,69 +369,49 @@ io.on('connection', (socket) => {
         socket.currentRoom = null;
 
         if (wasHost) {
-
-            transferHost(
-                room,
-                socket.id,
-                'left'
-            );
+            transferHost(room, socket.id, 'left');
 
             if (room.hostId) {
-                const newHostSocket =
-                    io.sockets.sockets.get(room.hostId);
+                const newHostSocket = io.sockets.sockets.get(room.hostId);
 
                 if (newHostSocket) {
-                    newHostSocket.emit(
-                        'session_notice',
-                        {
-                            type: 'new_host',
-                            title: 'NY PROTOKOLLFÖRARE',
-                            message:
-                                `${playerName || 'Den tidigare protokollföraren'} har lämnat sessionen. Du är nu protokollförare.`
-                        }
-                    );
+                    newHostSocket.emit('session_notice', {
+                        type: 'new_host',
+                        title: 'NY PROTOKOLLFÖRARE',
+                        message: `${playerName || 'Den tidigare protokollföraren'} har lämnat sessionen. Du är nu protokollförare.`
+                    });
                 }
             }
         }
 
         emitState(room);
 
-        socket.emit('session_left');
+        socket.emit('session_reset', {
+            roomCode: room.roomCode
+        });
 
         cleanupEmptyRoom(room);
     });
 
     // ========================================================
     // DISCONNECT
-    //
-    // Viktigt:
-    // Ett vanligt disconnect avslutar INTE sessionen direkt.
-    // Hosten får en respittid.
     // ========================================================
 
     socket.on('disconnect', () => {
 
-        console.log(
-            `🔴 Socket disconnectade: ${socket.id}`
-        );
+        console.log(`🔴 Socket disconnectade: ${socket.id}`);
 
         const room = getRoom(socket.currentRoom);
 
         if (!room) return;
 
-        const wasHost =
-            socket.id === room.hostId;
+        const wasHost = socket.id === room.hostId;
 
         delete room.playerSockets[socket.id];
 
         if (wasHost) {
-
-            console.log(
-                `⚠️ Protokollföraren tappade anslutningen i ${room.roomCode}`
-            );
-
+            console.log(`⚠️ Protokollföraren tappade anslutningen i ${room.roomCode}`);
             scheduleHostTransfer(room);
-
         }
 
         cleanupEmptyRoom(room);
@@ -581,12 +436,6 @@ app.get('/health', (req, res) => {
 const PORT = process.env.PORT || 3001;
 
 server.listen(PORT, () => {
-
-    console.log(
-        `🎲 Chicago-server körs på port ${PORT}`
-    );
-
-    console.log(
-        `📡 Väntar på anslutningar...`
-    );
+    console.log(`🎲 Chicago-server körs på port ${PORT}`);
+    console.log(`📡 Väntar på anslutningar...`);
 });
