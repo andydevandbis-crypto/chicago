@@ -2267,6 +2267,14 @@ function gameScreen() {
     const bottom =
         el("div","bottom-frame");
 
+        bottom.appendChild(
+            button(
+                "STATISTIK",
+                "",
+                showStatistics
+            )
+        );
+
     if (isHost()) {
 
         bottom.appendChild(
@@ -2274,14 +2282,6 @@ function gameScreen() {
                 "NY OMGÅNG",
                 "",
                 nextRound
-            )
-        );
-
-        bottom.appendChild(
-            button(
-                "STATISTIK",
-                "",
-                showStatistics
             )
         );
 

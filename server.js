@@ -193,6 +193,8 @@ function cleanupEmptyRoom(room) {
 
     if (connectedPlayers.length > 0) return;
 
+ room.statistics = {};
+
     if (room.hostDisconnectTimer) {
         clearTimeout(room.hostDisconnectTimer);
         room.hostDisconnectTimer = null;
