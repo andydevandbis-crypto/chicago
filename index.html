@@ -83,10 +83,6 @@ button, input {
     box-shadow: 0 4px 20px var(--gold-glow);
 }
 
-.start-game-btn {
-    margin-top: 12px;
-}
-
 .btn:active {
     transform: scale(.96);
 }
@@ -146,6 +142,7 @@ button, input {
     font-weight: 300;
     letter-spacing: 12px;
     color: var(--gold);
+    margin-bottom: 8px;  /* 🆕 MER LUFT */
 }
 
 .start-subtitle {
@@ -180,6 +177,7 @@ button, input {
     border-radius: 8px;
     box-shadow: var(--shadow);
     margin-bottom: 20px;
+    margin-top: 12px;  /* 🆕 MER LUFT */
 }
 
 .name-row {
@@ -210,6 +208,17 @@ button, input {
 
 .name-row input:focus {
     border-color: var(--gold);
+}
+
+/* 🆕 KNAPPRAD - vågrätt */
+.button-row {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 10px;
+    width: 100%;
+    max-width: 440px;
 }
 
 /* ============================================================
@@ -776,6 +785,10 @@ button, input {
     .score-table td {
         padding: 8px;
     }
+    
+    .button-row {
+        gap: 8px;
+    }
 }
 
 @media (max-width:400px) {
@@ -818,6 +831,10 @@ button, input {
         font-size: 12px;
         min-height: 38px;
         min-width: 100px;
+    }
+    
+    .button-row {
+        gap: 6px;
     }
 }
 </style>
@@ -1361,13 +1378,10 @@ socket.on("host_disconnected", () => {
         currentScreen === "winner"
     ) {
 
-        setTimeout(() => {
-
-            alert(
-                "Protokollföraren har kopplats från."
-            );
-
-        }, 100);
+        showBanner(
+            "PROTOKOLLFÖRARE BORT",
+            "Protokollföraren har kopplats från. Väntar på ny..."
+        );
     }
 });
 
@@ -1866,43 +1880,46 @@ function startScreen() {
             nameEntries.push(input);
         }
 
-        roomBox.appendChild(
-            button("STARTA SPEL", "start-game-btn", () => {
+        // 🆕 Spara start-knappen i en variabel
+        const startBtn = button("STARTA SPEL", "start-game-btn", () => {
 
-                const names =
-                    nameEntries
-                        .map(i => i.value.trim())
-                        .filter(Boolean);
+            const names =
+                nameEntries
+                    .map(i => i.value.trim())
+                    .filter(Boolean);
 
-                if (!names.length) {
+            // 🆕 Minst 2 spelare krävs
+            if (names.length < 2) {
 
-                    showBanner(
-                        "INGA SPELARE",
-                        "Skriv in minst en spelare."
-                    );
+                showBanner(
+                    "FÖR FÅ SPELARE",
+                    "Skriv in minst två spelare."
+                );
 
-                    return;
-                }
+                return;
+            }
 
-                if (
-                    new Set(
-                        names.map(
-                            n => n.toLowerCase()
-                        )
-                    ).size !== names.length
-                ) {
+            if (
+                new Set(
+                    names.map(
+                        n => n.toLowerCase()
+                    )
+                ).size !== names.length
+            ) {
 
-                    showBanner(
-                        "DUBBLA NAMN",
-                        "Varje spelare måste ha ett unikt namn."
-                    );
+                showBanner(
+                    "DUBBLA NAMN",
+                    "Varje spelare måste ha ett unikt namn."
+                );
 
-                    return;
-                }
+                return;
+            }
 
-                startGame(names);
-            })
-        );
+            startGame(names);
+        });
+
+        // Spara startBtn för att använda i knappraden
+        window._startBtn = startBtn;
 
     } else {
 
@@ -1932,7 +1949,7 @@ function startScreen() {
     }
 
     /* ========================================================
-       AVSLUTA SESSION
+       AVSLUTA SESSION - KNAPPRAD (vågrätt)
        ======================================================== */
 
     const resetBtn =
@@ -1942,8 +1959,19 @@ function startScreen() {
             resetSession
         );
 
+    // 🆕 Skapa knapprad (vågrätt)
+    const buttonRow =
+        el("div", "button-row");
+
+    // Om host, lägg till STARTA SPEL i samma rad
+    if (isHost() && window._startBtn) {
+        buttonRow.appendChild(window._startBtn);
+    }
+
+    buttonRow.appendChild(resetBtn);
+
     screen.appendChild(roomBox);
-    screen.appendChild(resetBtn);
+    screen.appendChild(buttonRow);
 
     app.appendChild(screen);
 }
@@ -2382,6 +2410,17 @@ function openScorePopup(
 
             btn.onclick = () => {
 
+                // 🆕 VARNING FÖR FYRTAL (endast S2)
+                if (gameNumber === 1 && keyName === "fyrtal") {
+                    if (!confirm(
+                        "⚠️ VARNING!\n\n" +
+                        "Fyrtal sänker ALLA ANDRA spelare till 0 poäng.\n\n" +
+                        "Är du säker?"
+                    )) {
+                        return; // Avbryt om användaren säger nej
+                    }
+                }
+
                 selectedBase = value;
                 selectedCombination = keyName;
 
@@ -2589,11 +2628,47 @@ function saveScore(
         statistics[player].outplay++;
     }
 
+    // ═══════════════════════════════════════════════════════
+    // 🆕 FYRTAL-LOGIK: Alla andra åker till 0
+    // ═══════════════════════════════════════════════════════
+
+    if (combinationKey === "fyrtal" && (!old || old.base !== base)) {
+
+        // Nollställ alla andra spelare
+        for (const otherPlayer of players) {
+            if (otherPlayer !== player) {
+                if (scores[otherPlayer]) {
+                    for (let r = 0; r < scores[otherPlayer].length; r++) {
+                        const round = scores[otherPlayer][r];
+
+                        if (round?.s1) {
+                            round.s1.total = 0;
+                            round.s1.base = 0;
+                            round.s1.outplay = 0;
+                        }
+                        if (round?.s2) {
+                            round.s2.total = 0;
+                            round.s2.base = 0;
+                            round.s2.outplay = 0;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Visa banner
+        showBanner(
+            "🔥 FYRTAL!",
+            `${player} fick fyrtal! Alla andra åker tillbaka till 0 poäng! 🃏`,
+            4000
+        );
+    }
+
+    // ═══════════════════════════════════════════════════════
+
     sendState();
 
-    if (
-        currentScreen === "stats"
-    ) {
+    if (currentScreen === "stats") {
         showStatistics();
     }
 }
